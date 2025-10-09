@@ -16,8 +16,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             
             try {
                 const user = await UserService.verifyCredentials(
-                    credentials.email, 
-                    credentials.password
+                    credentials.email?.toString(), 
+                    credentials.password?.toString()
                 );
 
                 return user
@@ -28,4 +28,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
     })
   ],
+  pages: {
+    signIn: '/login',
+  }
 })

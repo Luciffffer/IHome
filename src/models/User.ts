@@ -1,27 +1,47 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-const UserSchema = new mongoose.Schema({
+export interface IUser extends Document {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    profilePicture?: string;
+    role: 'user' | 'admin';
+    comparePassword(candidatePassword: string): Promise<boolean>;
+}
+
+const UserSchema = new mongoose.Schema<IUser>({
     firstName: {
         type: String,
-        required: true
+        trim: true,
+        required: true,
+        maxlength: 50
     },
     lastName: {
         type: String,
-        required: true
+        trim: true,
+        required: true,
+        maxlength: 50
     },
     email: {
         type: String,
-        required: true,
-        unique: true
+        required: [true, 'Email is required'],
+        unique: true,
+        lowercase: true,
+        trim: true,
+        match: [/\S+@\S+\.\S+/, 'Not a valid email']
     },
     password: {
         type: String,
-        required: true
+        required: [true, 'Password is required'],
+        minlength: [6, 'Password must be at least 6 characters long']
     },
     profilePicture: {
         type: String,
-        required: false
+        required: false,
+        trim: true,
+        default: 'https://thispersondoesnotexist.com/'
     },
     role: {
         type: String,
@@ -43,4 +63,4 @@ UserSchema.methods.comparePassword = async function (candidatePassword: string) 
     return bcrypt.compare(candidatePassword, this.password);
 }
 
-export default mongoose.models?.User || mongoose.model('User', UserSchema);
+export default mongoose.models?.User || mongoose.model<IUser>('User', UserSchema);
