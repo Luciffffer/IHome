@@ -9,14 +9,18 @@ export default async function LoginPage({
 }) {
   const { error } = await searchParams;
 
-  console.log('Rendering login page with error:', error);
-
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+    <div
+      className="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10 
+        bg-repeat bg-center bg-muted"
+      style={{
+        backgroundImage: 'url(/images/workbench-bg-graphic.svg)',
+      }}
+    >
       <div className="flex w-full max-w-sm flex-col gap-6">
-        <a href="#" className="flex items-center gap-2 self-center font-medium">
-          iHome
-        </a>
+        <span className="font-semibold font-body-lg text-center">
+          I<span className="font-light">home</span>
+        </span>
         {error && (
           <Alert variant="destructive">
             <AlertCircleIcon />

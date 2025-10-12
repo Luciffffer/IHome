@@ -1,7 +1,16 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { UserService } from "@/services/UserService"
- 
+import { DomainUser } from "./models/User"
+
+// Auth.js works with module augmentation :/
+declare module "next-auth" {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    interface User extends DomainUser {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    interface AdapterUser extends DomainUser {}
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
@@ -30,5 +39,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   pages: {
     signIn: '/login',
+    signOut: '/api/auth/logout',
+  },
+  callbacks: {
+    async session({ session, token }) {
+        session.user = {
+            ...session.user,
+            firstName: (token.firstName || '') as string,
+            lastName: (token.lastName || '') as string,
+            email: token.email || '' as string,
+            profilePicture: token.image?.toString() || '',
+            role: token.role as "user" | "admin" || "user"
+        };
+        return session
+    },
+    async jwt({ token, user }) {
+        if (user) {
+
+            token.firstName = user.firstName;
+            token.lastName = user.lastName;
+            token.email = user.email;
+            token.image = user.profilePicture;
+            token.role = user.role;
+        }
+        return token;
+    }
   }
 })

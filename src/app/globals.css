@@ -1,17 +1,39 @@
 @import 'tailwindcss';
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  /* COLORS */
+  --color-primary: var(--color-orange-500);
+
   /* FONTS */
-  --font-poppins: 'Poppins', sans-serif;
-  --font-inter: 'Inter', sans-serif;
+  --font-heading: 'Poppins', sans-serif;
+  --font-sans: 'Inter', sans-serif;
+
+  /* Font size */
+  --text-body-xs: 0.75rem;
+  --text-body-sm: 0.875rem;
+  --text-body-base: 1rem;
+  --text-body-lg: 1.166rem;
+  --text-body-xl: 1.363rem;
+
+  --text-heading-2xs: 1rem;
+  --text-heading-xs: 1.333rem;
+  --text-heading-sm: 1.777rem;
+  --text-heading-base: 2.369rem;
+  --text-heading-lg: 3.157rem;
+  --text-heading-xl: 4.209rem;
+  --text-heading-2xl: 5.61rem;
 }
 
 @layer base {
   body {
-    @apply font-inter;
+    @apply font-sans bg-background text-foreground;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
   }
 }
 
@@ -61,7 +83,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: var(--color-orange-500);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -122,11 +144,125 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+/* FONT TYPES */
+
+/* Body */
+
+@utility font-body-xs {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-xs);
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+@utility font-body-sm {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+@utility font-body-base {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-base);
+  line-height: 1.5;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+@utility font-body-lg {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-lg);
+  line-height: 1.5;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+@utility font-body-xl {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-xl);
+  line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Button */
+
+@utility font-button-sm {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sm);
+  line-height: 24px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+@utility font-button-base {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-base);
+  line-height: 24px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+@utility font-button-lg {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-lg);
+  line-height: 24px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Heading */
+
+@utility font-heading-2xs {
+  font-family: var(--font-heading);
+  font-size: var(--text-heading-2xs);
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+@utility font-heading-xs {
+  font-family: var(--font-heading);
+  font-size: var(--text-heading-xs);
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+@utility font-heading-sm {
+  font-family: var(--font-heading);
+  font-size: var(--text-heading-sm);
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+@utility font-heading-base {
+  font-family: var(--font-heading);
+  font-size: var(--text-heading-base);
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+@utility font-heading-lg {
+  font-family: var(--font-heading);
+  font-size: var(--text-heading-lg);
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+@utility font-heading-xl {
+  font-family: var(--font-heading);
+  font-size: var(--text-heading-xl);
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+@utility font-heading-2xl {
+  font-family: var(--font-heading);
+  font-size: var(--text-heading-2xl);
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }

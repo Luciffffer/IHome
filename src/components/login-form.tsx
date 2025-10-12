@@ -22,7 +22,7 @@ export function LoginForm({
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Welcome back</CardTitle>
-          <CardDescription>Login with your account</CardDescription>
+          <CardDescription>Log in with your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form

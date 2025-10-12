@@ -6,6 +6,15 @@ if (!MONGODB_URI) {
     throw new Error('Please define the MONGODB_URI environment variable')
 }
 
+interface CustomGlobal {
+  mongoose: {
+    conn: typeof mongoose | null;
+    promise: Promise<typeof mongoose> | null;
+  };
+}
+
+declare const global: CustomGlobal
+
 let cached = global.mongoose;
 
 if (!cached) {

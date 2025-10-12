@@ -1,4 +1,4 @@
-import User from "@/models/User";
+import User, { IUser, DomainUser } from "@/models/User";
 import dbConnect from "@/lib/db";
 import { RegisterSchema } from "@/app/api/auth/register/route";
 
@@ -8,20 +8,16 @@ export class UserService {
         return User.findOne({ email });
     }
 
-    static async verifyCredentials(email: string, password: string) {
+    static async verifyCredentials(email: string, password: string): Promise<DomainUser | null> {
         await dbConnect()
         
-        const user = await User.findOne({ email })
+        const user = await User.findOne<IUser>({ email })
         if (!user) return null
 
         const isValid = await user.comparePassword(password)
         if (!isValid) return null
 
-        return {
-            id: user._id.toString(),
-            name: user.name,
-            email: user.email,
-        }
+        return user as DomainUser;
     }
 
     static async register(data: RegisterSchema) {
