@@ -1,11 +1,13 @@
 import mongoose, { Document } from "mongoose";
 
-export interface IFloor extends Document {
+export interface IFloor {
     name: string;
     order: number;
 }
 
-const floorSchema = new mongoose.Schema<IFloor>({
+export interface IFloorDocument extends IFloor, Document {}
+
+const floorSchema = new mongoose.Schema<IFloorDocument>({
     name: {
         type: String,
         required: true,

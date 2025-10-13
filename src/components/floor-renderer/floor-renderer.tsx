@@ -15,7 +15,7 @@ import { useFloors } from '@/contexts/floor-context';
 import { Spinner } from '../ui/spinner';
 
 const FloorRenderer = memo(function FloorRenderer() {
-  const { currentFloor, isLoading, error } = useFloors();
+  const { currentFloor, isLoading, error, createFloor } = useFloors();
   const isEmpty = !isLoading && !error && !currentFloor;
 
   return (
@@ -30,6 +30,7 @@ const FloorRenderer = memo(function FloorRenderer() {
           <Spinner className="size-12 text-primary" />
         </div>
       )}
+
       {isEmpty && (
         <Empty className="bg-muted h-72">
           <EmptyHeader>
@@ -42,7 +43,7 @@ const FloorRenderer = memo(function FloorRenderer() {
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button>Add Floor</Button>
+            <Button onClick={createFloor}>Add Floor</Button>
           </EmptyContent>
         </Empty>
       )}

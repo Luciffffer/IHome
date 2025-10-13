@@ -23,6 +23,7 @@ interface FloorContextValue {
   // actions
   setCurrentFloorIndex: (index: number) => void;
   refreshFloors: () => Promise<void>;
+  createFloor: () => Promise<void>;
 }
 
 const FloorContext = createContext<FloorContextValue | undefined>(undefined);
@@ -74,6 +75,31 @@ export function FloorProvider({ children }: FloorProviderProps) {
     }
   }, [currentFloorIndex]);
 
+  // create a new floor with a temporary name
+  const createFloor = async () => {
+    try {
+      const tempName = `Floor ${floors.length + 1}`;
+      const response = await fetch('api/floors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: tempName }),
+      });
+
+      if (!response.ok)
+        throw new Error(`Failed to create floor: ${response.statusText}`);
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Send user to edit page for the new floor
+        window.location.href = `/floor-planner/${data.data._id}`;
+      }
+    } catch (error) {
+      console.error('Failed to create floor:', error);
+      throw error;
+    }
+  };
+
   // Initial fetch
   useEffect(() => {
     fetchFloors();
@@ -87,6 +113,7 @@ export function FloorProvider({ children }: FloorProviderProps) {
     error,
     setCurrentFloorIndex,
     refreshFloors: fetchFloors,
+    createFloor,
   };
 
   return (
