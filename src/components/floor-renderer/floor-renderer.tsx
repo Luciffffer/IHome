@@ -10,10 +10,13 @@ import {
   EmptyTitle,
 } from '../ui/empty';
 import { Button } from '../ui/button';
+import { memo } from 'react';
+import { useFloors } from '@/contexts/floor-context';
+import { Spinner } from '../ui/spinner';
 
-function FloorRenderer({ selectedFloorId }: { selectedFloorId?: string }) {
-  // simulate getting floor from api
-  const isEmpty = !selectedFloorId;
+const FloorRenderer = memo(function FloorRenderer() {
+  const { currentFloor, isLoading, error } = useFloors();
+  const isEmpty = !isLoading && !error && !currentFloor;
 
   return (
     <main
@@ -22,8 +25,13 @@ function FloorRenderer({ selectedFloorId }: { selectedFloorId?: string }) {
         backgroundImage: 'url(/images/workbench-bg-graphic.svg)',
       }}
     >
+      {isLoading && (
+        <div className="bg-muted h-72 w-full flex items-center justify-center">
+          <Spinner className="size-12 text-primary" />
+        </div>
+      )}
       {isEmpty && (
-        <Empty className="bg-muted">
+        <Empty className="bg-muted h-72">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <HouseWifi />
@@ -53,6 +61,6 @@ function FloorRenderer({ selectedFloorId }: { selectedFloorId?: string }) {
       </nav>
     </main>
   );
-}
+});
 
 export default FloorRenderer;

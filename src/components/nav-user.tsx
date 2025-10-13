@@ -1,5 +1,3 @@
-import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,15 +10,15 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { ChevronsUpDown, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { auth } from '@/auth';
 
-async function NavUser() {
-  const session = await auth()!;
-  if (!session?.user) redirect('/login');
-  const user = session.user;
+async function NavUser({ className }: { className?: string }) {
+  const session = await auth();
+  const user = session!.user!;
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex gap-6 items-center">
+      <DropdownMenuTrigger className={`flex gap-6 items-center ${className}`}>
         <div className="flex gap-3 items-center">
           <Avatar className="h-9 w-9 rounded-full">
             <AvatarImage
