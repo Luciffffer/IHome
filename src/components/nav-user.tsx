@@ -23,6 +23,7 @@ async function NavUser({ className }: { className?: string }) {
           <Avatar className="h-9 w-9 rounded-full">
             <AvatarImage
               src={user.profilePicture}
+              className="object-cover"
               alt={`${user.firstName} ${user.lastName}`}
             />
             <AvatarFallback>
@@ -40,12 +41,13 @@ async function NavUser({ className }: { className?: string }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-        sideOffset={12}
+        sideOffset={16}
       >
         <DropdownMenuLabel>
           <div className="flex gap-3 items-center">
             <Avatar className="h-9 w-9 rounded-full">
               <AvatarImage
+                className="object-cover"
                 src={user.profilePicture}
                 alt={`${user.firstName} ${user.lastName}`}
               />

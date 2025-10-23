@@ -1,7 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-export interface DomainUser {
+export interface IUser {
     firstName: string;
     lastName: string;
     email: string;
@@ -10,11 +10,11 @@ export interface DomainUser {
     role: 'user' | 'admin';
 }
 
-export interface IUser extends Document, DomainUser {
+export interface IUserDocument extends Document, IUser {
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const UserSchema = new mongoose.Schema<IUser>({
+const UserSchema = new mongoose.Schema<IUserDocument>({
     firstName: {
         type: String,
         trim: true,
@@ -66,4 +66,4 @@ UserSchema.methods.comparePassword = async function (candidatePassword: string) 
     return bcrypt.compare(candidatePassword, this.password);
 }
 
-export default mongoose.models?.User || mongoose.model<IUser>('User', UserSchema);
+export default mongoose.models?.User || mongoose.model<IUserDocument>('User', UserSchema);

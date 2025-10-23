@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
         const user = await UserService.register(validatedData);
 
         return NextResponse.json({ 
-            email: user.user.email,
-            id: user.user._id
+            email: user.email,
+            id: user._id
          }, { status: 201 });
     } catch (error) {
         if (error instanceof ZodError) {

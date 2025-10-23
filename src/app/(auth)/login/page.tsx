@@ -1,11 +1,11 @@
-import { LoginForm } from '@/components/login-form';
+import { LoginForm } from '@/components/login/login-form';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import { AlertCircleIcon } from 'lucide-react';
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error: string | undefined }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
 

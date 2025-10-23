@@ -1,14 +1,14 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { UserService } from "@/services/UserService"
-import { DomainUser } from "./models/User"
+import { IUser } from "./models/User"
 
 // Auth.js works with module augmentation :/
 declare module "next-auth" {
     // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    interface User extends DomainUser {}
+    interface User extends IUser {}
     // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    interface AdapterUser extends DomainUser {}
+    interface AdapterUser extends IUser {}
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
