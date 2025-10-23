@@ -92,7 +92,7 @@ export function FloorProvider({ children }: FloorProviderProps) {
 
       if (data.success) {
         // Send user to edit page for the new floor
-        window.location.href = `/floor-planner/${data.data._id}`;
+        window.location.href = `/floor-planner/${data.data.objectId}`;
       }
     } catch (error) {
       console.error('Failed to create floor:', error);

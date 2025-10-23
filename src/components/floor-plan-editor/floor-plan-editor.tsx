@@ -1,189 +1,270 @@
 'use client';
 
 import { IFloor } from '@/models/Floor';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useGesture } from '@use-gesture/react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { EditorToolbar } from './controls/editor-toolbar';
+import { CanvasRenderer } from './canvas/canvas-renderer';
+import { useDrawingMode } from './hooks/use-drawing-mode';
+import { useCanvasSize } from './hooks/use-canvas-size';
+import { usePanZoom } from './hooks/use-pan-zoom';
+import { useSelection } from './hooks/use-selection';
+import { IRoom } from '@/models/Room';
+import { RoomPropertiesPanel } from './controls/room-properties-panel';
+import { toast, Toaster } from 'sonner';
 
 interface FloorPlanEditorProps {
   floor: IFloor;
 }
 
-type InteractionMode = 'none' | 'drawing' | 'moving' | 'resizing';
+export const DEFAULT_ROOM_COLORS = [
+  '#ffadad',
+  '#ffd6a5',
+  '#fdffb6',
+  '#caffbf',
+  '#9bf6ff',
+  '#a0c4ff',
+  '#bdb2ff',
+  '#ffc6ff',
+];
+
+export type InteractionMode = 'select' | 'drawing';
+export type CanvasState = 'moving' | 'resizing' | 'none';
+export type CursorClass =
+  | 'cursor-default'
+  | 'cursor-crosshair'
+  | 'cursor-move'
+  | 'cursor-grabbing';
+
+// Consolidated editor state
+interface EditorState {
+  interactionMode: InteractionMode;
+  canvasState: CanvasState;
+  cursorStyle: CursorClass;
+  selectedRoomId: string | null;
+}
+
+type EditorAction =
+  | { type: 'SET_INTERACTION_MODE'; payload: InteractionMode }
+  | { type: 'SET_CANVAS_STATE'; payload: CanvasState }
+  | { type: 'SET_CURSOR_STYLE'; payload: CursorClass }
+  | { type: 'SELECT_ROOM'; payload: string | null }
+  | { type: 'START_MOVING' }
+  | { type: 'START_RESIZING' }
+  | { type: 'END_INTERACTION' };
+
+function editorReducer(state: EditorState, action: EditorAction): EditorState {
+  switch (action.type) {
+    case 'SET_INTERACTION_MODE':
+      return { ...state, interactionMode: action.payload };
+    case 'SET_CANVAS_STATE':
+      return { ...state, canvasState: action.payload };
+    case 'SET_CURSOR_STYLE':
+      return { ...state, cursorStyle: action.payload };
+    case 'SELECT_ROOM':
+      return { ...state, selectedRoomId: action.payload };
+    case 'START_MOVING':
+      return {
+        ...state,
+        canvasState: 'moving',
+        cursorStyle: 'cursor-grabbing',
+      };
+    case 'START_RESIZING':
+      return { ...state, canvasState: 'resizing', cursorStyle: 'cursor-move' };
+    case 'END_INTERACTION':
+      return { ...state, canvasState: 'none', cursorStyle: 'cursor-default' };
+    default:
+      return state;
+  }
+}
 
 export function FloorPlanEditor({ floor }: FloorPlanEditorProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [rooms, setRooms] = useState<IRoom[]>([]);
 
-  const [canvasSize, setCanvasSize] = useState({ width: 1000, height: 550 });
+  const [editorState, dispatch] = useReducer(editorReducer, {
+    interactionMode: 'select',
+    canvasState: 'none',
+    cursorStyle: 'cursor-default',
+    selectedRoomId: null,
+  });
 
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-
-  const gridSize = 50; // 1m = 50px
-  const snappingThreshold = 10; // pixels
-
-  // Dynamically set canvas size to match container
-  useLayoutEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    function updateSize() {
-      setCanvasSize({
-        width: container!.clientWidth,
-        height: container!.clientHeight,
-      });
-    }
-
-    updateSize();
-
-    const resizeObserver = new ResizeObserver(updateSize);
-    resizeObserver.observe(container);
-
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  // Draw everything
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.save();
-    ctx.translate(pan.x, pan.y);
-    ctx.scale(zoom, zoom);
-
-    // Draw grid
-    ctx.strokeStyle = '#ddd';
-    ctx.lineWidth = 1 / zoom;
-
-    // Calculate the visible bounds in world coordinates
-    const left = -pan.x / zoom;
-    const top = -pan.y / zoom;
-    const right = left + canvas.width / zoom;
-    const bottom = top + canvas.height / zoom;
-
-    // Find the first vertical and horizontal grid lines to draw
-    const startX = Math.floor(left / gridSize) * gridSize;
-    const startY = Math.floor(top / gridSize) * gridSize;
-
-    // Draw vertical grid lines
-    for (let x = startX; x <= right; x += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(x, top);
-      ctx.lineTo(x, bottom);
-      ctx.stroke();
-    }
-
-    // Draw horizontal grid lines
-    for (let y = startY; y <= bottom; y += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(left, y);
-      ctx.lineTo(right, y);
-      ctx.stroke();
-    }
-
-    ctx.restore();
-  }, [floor, pan, zoom, canvasSize]);
-
-  useGesture(
-    {
-      onDrag: ({ offset: [dx, dy], pinching, event, touches, buttons }) => {
-        // Only allow panning if:
-        // - On desktop: middle mouse button (button 1) is pressed
-        // - On touch/trackpad: two fingers (touches === 2)
-        const isMiddleMouse =
-          event instanceof MouseEvent && event.buttons === 4;
-        const isTwoFingerTouch = touches === 2;
-
-        console.log('fingers:', touches, 'buttons:', buttons, event);
-
-        if (!(isMiddleMouse || isTwoFingerTouch)) return;
-        if (pinching) return; // Don't pan while pinching
-
-        setPan({ x: dx, y: dy });
-        event.preventDefault();
-      },
-      onPinch: ({ offset: [d, a], origin, event }) => {
-        // d is distance, a is angle, origin is [x, y]
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        const [ox, oy] = origin;
-        const mouseX = ox - rect.left;
-        const mouseY = oy - rect.top;
-
-        setZoom(prevZoom => {
-          const nextZoom = Math.max(0.2, Math.min(5, d));
-          setPan(prevPan => {
-            // World coords under finger before zoom
-            const wx = (mouseX - prevPan.x) / prevZoom;
-            const wy = (mouseY - prevPan.y) / prevZoom;
-            // New pan so world coords stay under finger
-            return {
-              x: mouseX - wx * nextZoom,
-              y: mouseY - wy * nextZoom,
-            };
-          });
-          return nextZoom;
-        });
-        event.preventDefault();
-      },
-      onWheel: ({ delta: [, dy], ctrlKey, event }) => {
-        // Trackpad pinch-to-zoom (ctrlKey) or two-finger scroll
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const mouseY = event.clientY - rect.top;
-
-        if (ctrlKey) {
-          setZoom(prevZoom => {
-            const clampedDy = Math.max(-40, Math.min(40, dy));
-            const zoomIntensity = 0.05; // Lower = less intense
-            const factor = Math.exp(-clampedDy * zoomIntensity);
-            const nextZoom = Math.max(0.2, Math.min(5, prevZoom * factor));
-            setPan(prevPan => {
-              // World coords under mouse before zoom
-              const wx = (mouseX - prevPan.x) / prevZoom;
-              const wy = (mouseY - prevPan.y) / prevZoom;
-              // New pan so world coords stay under mouse
-              return {
-                x: mouseX - wx * nextZoom,
-                y: mouseY - wy * nextZoom,
-              };
-            });
-            return nextZoom;
-          });
-        } else {
-          setPan(prev => ({ x: prev.x, y: prev.y - dy }));
-        }
-        event.preventDefault();
-      },
-    },
-    {
-      target: containerRef,
-      eventOptions: { passive: false },
-      drag: {
-        from: () => [pan.x, pan.y],
-        pointer: { touch: true },
-        filterTaps: true,
-      },
-      pinch: {
-        scaleBounds: { min: 0.2, max: 5 },
-        rubberband: true,
-      },
-    }
+  const canvasSize = useCanvasSize(containerRef);
+  const { pan, zoom } = usePanZoom(
+    containerRef,
+    editorState.interactionMode,
+    editorState.canvasState
   );
 
+  const {
+    isDrawing,
+    startPoint,
+    currentPoint,
+    isValidPlacement,
+    handlePointerDown: handleDrawingPointerDown,
+    handlePointerMove: handleDrawingPointerMove,
+    handlePointerUp: handleDrawingPointerUp,
+  } = useDrawingMode(
+    containerRef,
+    editorState.interactionMode,
+    pan,
+    zoom,
+    rooms,
+    setRooms,
+    (cursor: CursorClass) =>
+      dispatch({ type: 'SET_CURSOR_STYLE', payload: cursor })
+  );
+
+  const {
+    selectedRoom,
+    tempRoom,
+    isMoving,
+    isResizing,
+    handlePointerDown: handleSelectionPointerDown,
+    handlePointerMove: handleSelectionPointerMove,
+    handlePointerUp: handleSelectionPointerUp,
+    updateRoomProperty,
+  } = useSelection(
+    containerRef,
+    editorState.canvasState,
+    pan,
+    zoom,
+    rooms,
+    editorState.selectedRoomId,
+    setRooms,
+    isResizing =>
+      dispatch({
+        type: isResizing ? 'START_RESIZING' : 'END_INTERACTION',
+      }),
+    isMoving =>
+      dispatch({
+        type: isMoving ? 'START_MOVING' : 'END_INTERACTION',
+      }),
+    (roomId: string | null) =>
+      dispatch({ type: 'SELECT_ROOM', payload: roomId })
+  );
+
+  const saveFloor = useCallback(() => {
+    // TODO: Implement saving logic here
+    console.log('Saving floor...', { rooms });
+    toast.success('Floor has been saved successfully!');
+  }, [rooms]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.ctrlKey && event.key === 's') {
+        event.preventDefault();
+        saveFloor();
+      } else {
+        switch (event.key) {
+          case 'v':
+            dispatch({ type: 'SET_INTERACTION_MODE', payload: 'select' });
+            break;
+          case 'd':
+            dispatch({ type: 'SET_INTERACTION_MODE', payload: 'drawing' });
+            break;
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [saveFloor]);
+
+  // Combined event handlers
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      const handled = handleSelectionPointerDown(e);
+
+      if (editorState.interactionMode === 'drawing' && !handled) {
+        handleDrawingPointerDown(e);
+      } else {
+        dispatch({ type: 'SET_CURSOR_STYLE', payload: 'cursor-grabbing' });
+      }
+    },
+    [
+      editorState.interactionMode,
+      handleSelectionPointerDown,
+      handleDrawingPointerDown,
+    ]
+  );
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      const handled = handleSelectionPointerMove(e);
+
+      if (editorState.interactionMode === 'drawing' && !handled) {
+        handleDrawingPointerMove(e);
+      }
+    },
+    [
+      editorState.interactionMode,
+      handleSelectionPointerMove,
+      handleDrawingPointerMove,
+    ]
+  );
+
+  const handlePointerUp = useCallback(() => {
+    handleSelectionPointerUp();
+    if (editorState.interactionMode === 'drawing') {
+      const newRoom = handleDrawingPointerUp();
+      if (newRoom) {
+        dispatch({ type: 'SELECT_ROOM', payload: newRoom.objectId });
+        dispatch({ type: 'SET_INTERACTION_MODE', payload: 'select' });
+      }
+    }
+    dispatch({ type: 'END_INTERACTION' });
+  }, [
+    editorState.interactionMode,
+    handleSelectionPointerUp,
+    handleDrawingPointerUp,
+  ]);
+
+  const handleRoomDelete = useCallback((roomId: string) => {
+    setRooms(prevRooms => prevRooms.filter(room => room.objectId !== roomId));
+    dispatch({ type: 'SELECT_ROOM', payload: null });
+  }, []);
+
   return (
-    <main className="h-full bg-muted touch-none" ref={containerRef}>
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full"
-        width={canvasSize.width}
-        height={canvasSize.height}
+    <div className="relative h-full w-full touch-none overflow-hidden">
+      <Toaster />
+      <main
+        className={`h-full bg-muted touch-none ${editorState.cursorStyle}`}
+        ref={containerRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+      >
+        <CanvasRenderer
+          canvasSize={canvasSize}
+          pan={pan}
+          zoom={zoom}
+          rooms={rooms}
+          isDrawing={isDrawing}
+          startPoint={startPoint}
+          currentPoint={currentPoint}
+          isValidPlacement={isValidPlacement}
+          selectedRoom={selectedRoom}
+          tempRoom={tempRoom}
+        />
+      </main>
+      <EditorToolbar
+        interactionMode={editorState.interactionMode}
+        onModeChange={mode =>
+          dispatch({ type: 'SET_INTERACTION_MODE', payload: mode })
+        }
+        onSave={saveFloor}
       />
-    </main>
+      {selectedRoom && !isMoving && !isResizing && (
+        <RoomPropertiesPanel
+          room={selectedRoom}
+          pan={pan}
+          zoom={zoom}
+          onUpdateProperty={updateRoomProperty}
+          onDeleteRoom={handleRoomDelete}
+        />
+      )}
+    </div>
   );
 }

@@ -3,6 +3,7 @@ import Floor, { IFloor, IFloorDocument } from "@/models/Floor";
 
 function toIFloor(doc: IFloorDocument): IFloor {
     return {
+        objectId: doc.id.toString(),
         name: doc.name,
         order: doc.order
     }

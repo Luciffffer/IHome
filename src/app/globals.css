@@ -5,7 +5,7 @@
 
 @theme {
   /* COLORS */
-  --color-primary: var(--color-orange-500);
+  --color-primary: #ef8e4e;
 
   /* FONTS */
   --font-heading: 'Poppins', sans-serif;
@@ -219,14 +219,14 @@
   font-family: var(--font-heading);
   font-size: var(--text-heading-2xs);
   line-height: 1.4;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 @utility font-heading-xs {
   font-family: var(--font-heading);
   font-size: var(--text-heading-xs);
   line-height: 1.4;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 @utility font-heading-sm {

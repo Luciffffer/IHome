@@ -1,6 +1,7 @@
 import mongoose, { Document } from "mongoose";
 
 export interface IFloor {
+    objectId: string;
     name: string;
     order: number;
 }

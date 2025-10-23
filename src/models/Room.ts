@@ -1,6 +1,7 @@
 import mongoose, { Document } from "mongoose";
 
-export interface IRoom extends Document {
+export interface IRoom {
+    objectId: string;
     name: string;
     width: number;
     length: number;
@@ -9,7 +10,9 @@ export interface IRoom extends Document {
     color: string;
 }
 
-const roomSchema = new mongoose.Schema<IRoom>({
+export interface IRoomDocument extends IRoom, Document {}
+
+const roomSchema = new mongoose.Schema<IRoomDocument>({
     name: {
         type: String,
         required: true,

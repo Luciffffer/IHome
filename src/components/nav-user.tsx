@@ -29,14 +29,14 @@ async function NavUser({ className }: { className?: string }) {
               {`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col items-start">
+          <div className="flex-col items-start hidden md:flex">
             <span className="truncate font-medium">{`${user.firstName} ${user.lastName}`}</span>
             <span className="font-body-sm truncate font-normal -mt-1">
               {user.email}
             </span>
           </div>
         </div>
-        <ChevronsUpDown className="size-4" />
+        <ChevronsUpDown className="size-4 hidden md:flex" />
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
