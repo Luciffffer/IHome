@@ -1,0 +1,33 @@
+import { cn } from '@/lib/utils';
+
+interface LogoProps {
+  className?: string;
+}
+
+function Logo({ className }: LogoProps) {
+  return (
+    <svg
+      className={cn('aspect-[24/19]', className)}
+      width="24"
+      height="19"
+      viewBox="0 0 16 11"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M0 0.6875V11H5.5L3.4375 8.9375H1.375V1.375L0 0.6875Z"
+        fill="currentColor"
+      />
+      <path
+        d="M6.875 11L4.8125 8.9375H11.3438L6.875 3.4375L8.25 2.0625L13.0625 7.90625L15.4688 11H6.875Z"
+        fill="currentColor"
+      />
+      <path
+        d="M6.53125 0L2.0625 4.8125V7.21875L7.5625 1.375L6.53125 0Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+export default Logo;

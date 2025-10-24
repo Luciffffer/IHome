@@ -1,6 +1,6 @@
 'use client';
 
-import { HouseWifi, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import {
   Empty,
   EmptyContent,
@@ -13,9 +13,11 @@ import { Button } from '../ui/button';
 import { memo } from 'react';
 import { useFloors } from '@/contexts/floors-context';
 import { Spinner } from '../ui/spinner';
+import Logo from '../ui/logo';
 
 const FloorRenderer = memo(function FloorRenderer() {
-  const { currentFloor, isLoading, error, createFloor } = useFloors();
+  const { currentFloor, isLoading, error, createFloor, isCreatingFloor } =
+    useFloors();
   const isEmpty = !isLoading && !error && !currentFloor;
 
   return (
@@ -27,7 +29,7 @@ const FloorRenderer = memo(function FloorRenderer() {
     >
       {isLoading && (
         <div className="bg-muted h-72 w-full flex items-center justify-center">
-          <Spinner className="size-12 text-primary" />
+          <Spinner className="size-12 text-muted-foreground" />
         </div>
       )}
 
@@ -35,7 +37,7 @@ const FloorRenderer = memo(function FloorRenderer() {
         <Empty className="bg-muted h-72">
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <HouseWifi />
+              <Logo className="!w-9" />
             </EmptyMedia>
             <EmptyTitle>No Floors Defined Yet!</EmptyTitle>
             <EmptyDescription>
@@ -43,7 +45,10 @@ const FloorRenderer = memo(function FloorRenderer() {
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={createFloor}>Add Floor</Button>
+            <Button className="cursor-pointer" onClick={createFloor}>
+              {isCreatingFloor ? <Spinner /> : <Plus />}
+              Add Floor
+            </Button>
           </EmptyContent>
         </Empty>
       )}

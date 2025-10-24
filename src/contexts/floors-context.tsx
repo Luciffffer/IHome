@@ -1,6 +1,8 @@
 'use client';
 
 import { IFloor } from '@/models/Floor';
+import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import {
   createContext,
   ReactNode,
@@ -9,6 +11,7 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { toast } from 'sonner';
 
 interface FloorsContextValue {
   // floor data
@@ -19,6 +22,7 @@ interface FloorsContextValue {
   // loading states
   isLoading: boolean;
   error: string | null;
+  isCreatingFloor: boolean;
 
   // actions
   setCurrentFloorIndex: (index: number) => void;
@@ -39,6 +43,7 @@ export function FloorsProvider({ children }: FloorsProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const router = useRouter();
   const currentFloor = floors[currentFloorIndex] || null;
 
   // fetch floors from API
@@ -76,8 +81,9 @@ export function FloorsProvider({ children }: FloorsProviderProps) {
   }, [currentFloorIndex]);
 
   // create a new floor with a temporary name
-  const createFloor = async () => {
-    try {
+
+  const createFloorMutation = useMutation({
+    mutationFn: async () => {
       const tempName = `Floor ${floors.length + 1}`;
       const response = await fetch('api/floors', {
         method: 'POST',
@@ -88,16 +94,19 @@ export function FloorsProvider({ children }: FloorsProviderProps) {
       if (!response.ok)
         throw new Error(`Failed to create floor: ${response.statusText}`);
 
-      const data = await response.json();
+      return response.json();
+    },
+    onSuccess: data => {
+      router.push('/floor-planner/' + data.data.id + '?initial=true');
+    },
+    onError: () => {
+      toast.error('Failed to create floor. Please try again later.');
+    },
+  });
 
-      if (data.success) {
-        // Send user to edit page for the new floor
-        window.location.href = `/floor-planner/${data.data.objectId}`;
-      }
-    } catch (error) {
-      console.error('Failed to create floor:', error);
-      throw error;
-    }
+  const createFloor = async () => {
+    if (createFloorMutation.isPending) return;
+    await createFloorMutation.mutateAsync();
   };
 
   // Initial fetch
@@ -111,6 +120,7 @@ export function FloorsProvider({ children }: FloorsProviderProps) {
     currentFloor,
     isLoading,
     error,
+    isCreatingFloor: createFloorMutation.isPending,
     setCurrentFloorIndex,
     refreshFloors: fetchFloors,
     createFloor,

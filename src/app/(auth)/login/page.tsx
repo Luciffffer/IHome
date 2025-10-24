@@ -1,6 +1,11 @@
 import { LoginForm } from '@/components/login/login-form';
 import { Alert, AlertTitle } from '@/components/ui/alert';
+import Logo from '@/components/ui/logo';
 import { AlertCircleIcon } from 'lucide-react';
+
+export const metadata = {
+  title: 'Login',
+};
 
 export default async function LoginPage({
   searchParams,
@@ -18,9 +23,12 @@ export default async function LoginPage({
       }}
     >
       <div className="flex w-full max-w-sm flex-col gap-6">
-        <span className="font-semibold font-body-lg text-center">
-          I<span className="font-light">home</span>
-        </span>
+        <div className="flex gap-2 items-baseline-last justify-center">
+          <Logo className="w-9" />
+          {/* <span className="font-semibold font-body-lg text-center">
+            I<span className="font-light">home</span>
+          </span> */}
+        </div>
         {error && (
           <Alert variant="destructive">
             <AlertCircleIcon />

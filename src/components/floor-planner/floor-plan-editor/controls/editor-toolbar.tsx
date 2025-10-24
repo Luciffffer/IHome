@@ -2,6 +2,8 @@ import { MousePointer2, Pencil, Save } from 'lucide-react';
 import { Button } from '../../../ui/button';
 import { InteractionMode } from '../floor-plan-editor';
 import SettingsPanel from './settings-panel';
+import { useFloor } from '@/contexts/floor-context';
+import { Spinner } from '@/components/ui/spinner';
 
 interface EditorToolbarProps {
   interactionMode: InteractionMode;
@@ -14,6 +16,8 @@ export function EditorToolbar({
   onModeChange,
   onSave,
 }: EditorToolbarProps) {
+  const { isSavingFloor } = useFloor();
+
   return (
     <nav
       aria-label="Control selector"
@@ -54,7 +58,7 @@ export function EditorToolbar({
             variant="ghost"
             onClick={onSave}
           >
-            <Save />
+            {isSavingFloor ? <Spinner /> : <Save />}
             Save
           </Button>
         </li>
