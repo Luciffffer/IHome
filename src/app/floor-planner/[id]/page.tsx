@@ -1,7 +1,9 @@
-import { FloorPlanEditor } from '@/components/floor-plan-editor/floor-plan-editor';
+import EditingTitle from '@/components/floor-planner/editing-title';
+import { FloorPlanEditor } from '@/components/floor-planner/floor-plan-editor/floor-plan-editor';
 import { Header } from '@/components/layout/header';
+import ReactQueryProvider from '@/components/react-query-provider';
+import { FloorProvider } from '@/contexts/floor-context';
 import { FloorService } from '@/services/FloorService';
-import { Pencil } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
 export const metadata = {
@@ -22,19 +24,22 @@ async function FloorPlannerPage({
     notFound();
   }
 
+  console.log('floor:', floor);
+
   const { initial } = await searchParams;
   console.log('initial param:', initial);
 
   return (
-    <div className="h-svh flex flex-col">
-      <Header>
-        <div className="shrink-0 flex items-center gap-2 text-body-sm">
-          <Pencil className="size-4" />
-          <p>Editing {floor?.name}</p>
+    <ReactQueryProvider>
+      <FloorProvider initialFloor={floor}>
+        <div className="h-svh flex flex-col">
+          <Header>
+            <EditingTitle />
+          </Header>
+          <FloorPlanEditor />
         </div>
-      </Header>
-      <FloorPlanEditor floor={floor} />
-    </div>
+      </FloorProvider>
+    </ReactQueryProvider>
   );
 }
 

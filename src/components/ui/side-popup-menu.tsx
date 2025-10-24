@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from './button';
 import { X } from 'lucide-react';
+import { ScrollArea, ScrollBar } from './scroll-area';
 
 interface SidePopupMenuProps extends React.HTMLAttributes<HTMLDivElement> {
   side?: 'left' | 'right';
@@ -90,7 +91,7 @@ function SidePopupMenuContent({
 
   return createPortal(
     <div
-      className={`fixed top-6 bottom-6 z-10 p-6 max-w-96 w-full
+      className={`fixed top-6 bottom-0 pb-6 z-10 p-6 max-w-96 w-full
         opacity-0 transition-all duration-300 ease-in-out pointer-events-none
         ${
           side === 'left'
@@ -101,21 +102,26 @@ function SidePopupMenuContent({
         ${className}`}
       {...props}
     >
-      <div
-        className="w-full bg-background border border-gray-300 shadow-lg p-4 
-        rounded-2xl pointer-events-auto h-full"
-      >
-        {React.Children.map(children, child => {
-          if (!React.isValidElement(child)) return child;
+      <div className="h-full flex flex-col min-h-0">
+        <ScrollArea
+          className="w-full bg-background border border-gray-300 shadow-lg 
+          rounded-2xl pointer-events-auto max-h-full *:max-h-full"
+        >
+          <div className="p-4">
+            {React.Children.map(children, child => {
+              if (!React.isValidElement(child)) return child;
 
-          if (child.type === SidePopupMenuHeader) {
-            return React.cloneElement(child, {
-              onClick: onClose,
-            } as SidePopupMenuHeaderProps);
-          } else {
-            return child;
-          }
-        })}
+              if (child.type === SidePopupMenuHeader) {
+                return React.cloneElement(child, {
+                  onClick: onClose,
+                } as SidePopupMenuHeaderProps);
+              } else {
+                return child;
+              }
+            })}
+          </div>
+          <ScrollBar orientation="vertical" />
+        </ScrollArea>
       </div>
     </div>,
     document.body

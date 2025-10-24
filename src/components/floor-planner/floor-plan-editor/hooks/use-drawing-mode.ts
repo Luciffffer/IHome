@@ -3,16 +3,17 @@ import { IRoom } from '@/models/Room';
 import { screenToWorld } from '../utils/coordinates';
 import { GRID_SIZE, snapToGrid } from '../utils/grid';
 import { CursorClass, DEFAULT_ROOM_COLORS } from '../floor-plan-editor';
+import { useFloor } from '@/contexts/floor-context';
 
 export function useDrawingMode(
     containerRef: React.RefObject<HTMLElement | null>,
     interactionMode: string,
     pan: { x: number; y: number },
     zoom: number,
-    rooms: IRoom[],
-    setRooms: React.Dispatch<React.SetStateAction<IRoom[]>>,
     setCursorStyle: (style: CursorClass) => void
 ) {
+    const { rooms, addRoom } = useFloor();
+
     const [isDrawing, setIsDrawing] = useState(false);
     const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null);
     const [currentPoint, setCurrentPoint] = useState<{ x: number; y: number } | null>(null);
@@ -21,10 +22,10 @@ export function useDrawingMode(
     const checkOverlap = (rect1: { x: number; y: number; width: number; length: number }, 
                           rect2: { x: number; y: number; width: number; length: number }) => {
         return !(
-            rect1.x + rect1.width <= rect2.x ||
-            rect1.x >= rect2.x + rect2.width * GRID_SIZE ||
-            rect1.y + rect1.length <= rect2.y ||
-            rect1.y >= rect2.y + rect2.length * GRID_SIZE
+            rect1.x + rect1.width <= rect2.x * GRID_SIZE ||
+            rect1.x >= rect2.x * GRID_SIZE + rect2.width * GRID_SIZE ||
+            rect1.y + rect1.length <= rect2.y * GRID_SIZE ||
+            rect1.y >= rect2.y * GRID_SIZE + rect2.length * GRID_SIZE
         )
     };
 
@@ -90,19 +91,16 @@ export function useDrawingMode(
 
     if (width > 0 && length > 0 && isValidPlacement) {
       newRoom = {
-          objectId: `room-${Date.now()}`,
-          x: minX,
-          y: minY,
+          id: `room-${Date.now()}`,
+          x: minX / GRID_SIZE,
+          y: minY / GRID_SIZE,
           width: width / GRID_SIZE,
           length: length / GRID_SIZE,
           name: 'New Room',
           color: DEFAULT_ROOM_COLORS[rooms.length % DEFAULT_ROOM_COLORS.length], 
         };
       
-        setRooms(prevRooms => [
-        ...prevRooms,
-        newRoom!,
-      ]);
+        addRoom(newRoom);
     }
 
     setIsDrawing(false);

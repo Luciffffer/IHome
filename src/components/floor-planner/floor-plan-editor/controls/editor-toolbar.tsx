@@ -1,5 +1,5 @@
 import { MousePointer2, Pencil, Save } from 'lucide-react';
-import { Button } from '../../ui/button';
+import { Button } from '../../../ui/button';
 import { InteractionMode } from '../floor-plan-editor';
 import SettingsPanel from './settings-panel';
 

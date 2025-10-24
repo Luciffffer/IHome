@@ -17,13 +17,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { GRID_SIZE } from '../utils/grid';
+import { useFloor } from '@/contexts/floor-context';
 
 interface RoomPropertiesPanelProps {
   room: IRoom;
   pan: { x: number; y: number };
   zoom: number;
   onUpdateProperty: (property: keyof IRoom, value: unknown) => void;
-  onDeleteRoom: (roomId: string) => void;
 }
 
 const propertiesSchema = z.object({
@@ -41,8 +41,9 @@ export function RoomPropertiesPanel({
   pan,
   zoom,
   onUpdateProperty,
-  onDeleteRoom,
 }: RoomPropertiesPanelProps) {
+  const { deleteRoom } = useFloor();
+
   const form = useForm<z.infer<typeof propertiesSchema>>({
     resolver: zodResolver(propertiesSchema),
     defaultValues: {
@@ -62,7 +63,7 @@ export function RoomPropertiesPanel({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Delete') {
         event.preventDefault();
-        onDeleteRoom(room.objectId);
+        deleteRoom(room.id);
       }
     };
 
@@ -70,12 +71,12 @@ export function RoomPropertiesPanel({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [room.objectId, onDeleteRoom]);
+  }, [room.id, deleteRoom]);
 
   // Position the panel above the room
   const position = worldToScreen(
-    room.x + (room.width * GRID_SIZE) / 2,
-    room.y,
+    room.x * GRID_SIZE + (room.width * GRID_SIZE) / 2,
+    room.y * GRID_SIZE,
     pan,
     zoom
   );
@@ -147,7 +148,7 @@ export function RoomPropertiesPanel({
       </FieldGroup>
       <Button
         variant="ghost"
-        onClick={() => onDeleteRoom(room.objectId)}
+        onClick={() => deleteRoom(room.id)}
         type="button"
         size="icon"
       >

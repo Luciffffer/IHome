@@ -1,27 +1,23 @@
 import dbConnect from "@/lib/db";
-import Floor, { IFloor, IFloorDocument } from "@/models/Floor";
-
-function toIFloor(doc: IFloorDocument): IFloor {
-    return {
-        objectId: doc.id.toString(),
-        name: doc.name,
-        order: doc.order
-    }
-
-}
+import { NotFoundError } from "@/lib/errors";
+import Floor, { floorDocToDTO, IFloor, IFloorDocument, normalizeFloorRooms } from "@/models/Floor";
 
 export class FloorService {
+    // Get
+
     static async getFloors(): Promise<IFloor[]> {
         await dbConnect();
         const floors = await Floor.find().sort({ order: 1 });
-        return floors.map(toIFloor);
+        return floors.map(floorDocToDTO);
     }
 
     static async getFloorById(id: string): Promise<IFloor | null> {
         await dbConnect();
-        const floor = await Floor.findById(id);
-        return floor ? toIFloor(floor) : null;
+        const floor = await Floor.findById<IFloorDocument>(id);
+        return floor ? floorDocToDTO(floor) : null;
     }
+
+    // Create
 
     static async createFloor(name: string): Promise<IFloor> {
         await dbConnect();
@@ -34,6 +30,35 @@ export class FloorService {
         });
 
         await newFloor.save();
-        return toIFloor(newFloor);
+        return floorDocToDTO(newFloor);
+    }
+
+    static async updateFloor(id: string, data: Partial<IFloor>): Promise<IFloor> {
+        await dbConnect();
+        const floorDoc = await Floor.findById(id);
+
+        if (!floorDoc) {
+            throw new NotFoundError('Floor', id);
+        }
+
+        if (data.name !== undefined) floorDoc.name = data.name;
+        if (data.order !== undefined) floorDoc.order = data.order;
+        if (data.rooms !== undefined) floorDoc.rooms = data.rooms;
+
+        normalizeFloorRooms(floorDoc);
+
+        await floorDoc.save();
+        return floorDocToDTO(floorDoc);
+    }
+
+    // Delete
+
+    static async deleteFloor(id: string): Promise<void> {
+        await dbConnect();
+        const floor = await Floor.findByIdAndDelete(id);
+
+        if (!floor) {
+            throw new NotFoundError('Floor', id);
+        }
     }
 }

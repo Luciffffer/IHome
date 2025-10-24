@@ -11,7 +11,7 @@ import {
 } from '../ui/empty';
 import { Button } from '../ui/button';
 import { memo } from 'react';
-import { useFloors } from '@/contexts/floor-context';
+import { useFloors } from '@/contexts/floors-context';
 import { Spinner } from '../ui/spinner';
 
 const FloorRenderer = memo(function FloorRenderer() {

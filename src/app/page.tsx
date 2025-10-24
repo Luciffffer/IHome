@@ -1,7 +1,7 @@
 import FloorRenderer from '@/components/floor-renderer/floor-renderer';
 import { FloorSwitcher } from '@/components/floor-switcher';
 import { Header } from '@/components/layout/header';
-import { FloorProvider } from '@/contexts/floor-context';
+import { FloorsProvider } from '@/contexts/floors-context';
 
 export const metadata = {
   title: 'Overview',
@@ -9,7 +9,7 @@ export const metadata = {
 
 function Home() {
   return (
-    <FloorProvider>
+    <FloorsProvider>
       <div className="h-svh flex flex-col">
         <Header>
           <FloorSwitcher />
@@ -17,7 +17,7 @@ function Home() {
 
         <FloorRenderer />
       </div>
-    </FloorProvider>
+    </FloorsProvider>
   );
 }
 

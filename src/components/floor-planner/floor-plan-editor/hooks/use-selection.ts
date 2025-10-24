@@ -3,6 +3,7 @@ import { IRoom } from '@/models/Room';
 import { screenToWorld } from '../utils/coordinates';
 import { GRID_SIZE, snapToGrid } from '../utils/grid';
 import { CanvasState } from '../floor-plan-editor';
+import { useFloor } from '@/contexts/floor-context';
 
 type ResizeHandle = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | null;
 
@@ -11,9 +12,7 @@ export function useSelection(
   canvasState: CanvasState,
   pan: { x: number; y: number },
   zoom: number,
-  rooms: IRoom[],
   selectedRoomId: string | null,
-  setRooms: React.Dispatch<React.SetStateAction<IRoom[]>>,
   setResizingMode: (isResizing: boolean) => void,
   setMovingMode: (isMoving: boolean) => void,
   setSelectedRoomId: (roomId: string | null) => void
@@ -21,12 +20,13 @@ export function useSelection(
   const [activeHandle, setActiveHandle] = useState<ResizeHandle>(null);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [tempRoom, setTempRoom] = useState<IRoom | null>(null);
+  const { rooms, updateRoom } = useFloor();
 
   const isMoving = canvasState === 'moving';
   const isResizing = canvasState === 'resizing';
   
   // Get the currently selected room
-  const selectedRoom = rooms.find(room => room.objectId === selectedRoomId) || null;
+  const selectedRoom = rooms.find(room => room.id === selectedRoomId) || null;
 
   const handlePointerDown = (event: React.PointerEvent): boolean => {
     if (!containerRef.current) return false;
@@ -54,7 +54,7 @@ export function useSelection(
     for (let i = rooms.length - 1; i >= 0; i--) {
       const room = rooms[i];
       if (isPointInRoom(x, y, room)) {
-        if (room.objectId === selectedRoomId) {
+        if (room.id === selectedRoomId) {
             // Already selected, start moving
             setMovingMode(true);
             setDragStart({ x, y });
@@ -63,7 +63,7 @@ export function useSelection(
             return true;
         } else {
             // Select this room
-            setSelectedRoomId(room.objectId);
+            setSelectedRoomId(room.id);
             event.stopPropagation();
             return true;
         }
@@ -92,32 +92,32 @@ export function useSelection(
       // Update the temp room position
       setTempRoom({
         ...tempRoom,
-        x: selectedRoom!.x + dx,
-        y: selectedRoom!.y + dy
+        x: (selectedRoom!.x * GRID_SIZE + dx) / GRID_SIZE,
+        y: (selectedRoom!.y * GRID_SIZE + dy) / GRID_SIZE
       });
     } else if (isResizing && tempRoom && activeHandle) {
       const newRoom = { ...tempRoom };
       
       switch (activeHandle) {
         case 'topLeft':
-          newRoom.width = snapToGrid(tempRoom.x + tempRoom.width * GRID_SIZE - x) / GRID_SIZE;
-          newRoom.length = snapToGrid(tempRoom.y + tempRoom.length * GRID_SIZE - y) / GRID_SIZE;
-          newRoom.x = snapToGrid(x);
-          newRoom.y = snapToGrid(y);
+          newRoom.width = snapToGrid(tempRoom.x * GRID_SIZE + tempRoom.width * GRID_SIZE - x) / GRID_SIZE;
+          newRoom.length = snapToGrid(tempRoom.y * GRID_SIZE + tempRoom.length * GRID_SIZE - y) / GRID_SIZE;
+          newRoom.x = snapToGrid(x) / GRID_SIZE;
+          newRoom.y = snapToGrid(y) / GRID_SIZE;
           break;
         case 'topRight':
-          newRoom.width = snapToGrid(x - tempRoom.x) / GRID_SIZE;
-          newRoom.length = snapToGrid(tempRoom.y + tempRoom.length * GRID_SIZE - y) / GRID_SIZE;
-          newRoom.y = snapToGrid(y);
+          newRoom.width = snapToGrid(x - tempRoom.x * GRID_SIZE) / GRID_SIZE;
+          newRoom.length = snapToGrid(tempRoom.y * GRID_SIZE + tempRoom.length * GRID_SIZE - y) / GRID_SIZE;
+          newRoom.y = snapToGrid(y) / GRID_SIZE;
           break;
         case 'bottomLeft':
-          newRoom.width = snapToGrid(tempRoom.x + tempRoom.width * GRID_SIZE - x) / GRID_SIZE;
-          newRoom.length = snapToGrid(y - tempRoom.y) / GRID_SIZE;
-          newRoom.x = snapToGrid(x);
+          newRoom.width = snapToGrid(tempRoom.x * GRID_SIZE + tempRoom.width * GRID_SIZE - x) / GRID_SIZE;
+          newRoom.length = snapToGrid(y - tempRoom.y * GRID_SIZE) / GRID_SIZE;
+          newRoom.x = snapToGrid(x) / GRID_SIZE;
           break;
         case 'bottomRight':
-          newRoom.width = snapToGrid(x - tempRoom.x) / GRID_SIZE;
-          newRoom.length = snapToGrid(y - tempRoom.y) / GRID_SIZE;
+          newRoom.width = snapToGrid(x - tempRoom.x * GRID_SIZE) / GRID_SIZE;
+          newRoom.length = snapToGrid(y - tempRoom.y * GRID_SIZE) / GRID_SIZE;
           break;
       }
       
@@ -134,12 +134,7 @@ export function useSelection(
     if ((isMoving || isResizing) && tempRoom) {
       // Check for overlap with other rooms
       if (!hasOverlap(tempRoom, rooms)) {
-        // Apply the changes
-        setRooms(prevRooms => 
-          prevRooms.map(room => 
-            room.objectId === tempRoom.objectId ? tempRoom : room
-          )
-        );
+        updateRoom(tempRoom.id, tempRoom);
       }
     }
     
@@ -154,13 +149,9 @@ export function useSelection(
   // Update room properties (name, color)
   const updateRoomProperty = useCallback((property: keyof IRoom, value: unknown) => {
     if (selectedRoomId) {
-      setRooms(prevRooms => 
-        prevRooms.map(room => 
-          room.objectId === selectedRoomId ? { ...room, [property]: value } : room
-        )
-      );
+      updateRoom(selectedRoomId, { [property]: value } as Partial<IRoom>);
     }
-  }, [selectedRoomId, setRooms]);
+  }, [selectedRoomId, updateRoom]);
 
   return {
     selectedRoom,
@@ -176,8 +167,8 @@ export function useSelection(
 
 // Check if a point is inside a room
 const isPointInRoom = (x: number, y: number, room: IRoom) => {
-  return x >= room.x && x <= room.x + room.width * GRID_SIZE && 
-          y >= room.y && y <= room.y + room.length * GRID_SIZE;
+  return x >= room.x * GRID_SIZE && x <= room.x * GRID_SIZE + room.width * GRID_SIZE && 
+          y >= room.y * GRID_SIZE && y <= room.y * GRID_SIZE + room.length * GRID_SIZE;
 };
 
 // Check if a point is near a resize handle
@@ -185,17 +176,17 @@ const getResizeHandleAtPoint = (x: number, y: number, room: IRoom, zoom: number)
   const handleSize = 10 / zoom; // Size of the handle in world coordinates
   
   // Check each corner
-  if (Math.abs(x - room.x) <= handleSize && Math.abs(y - room.y) <= handleSize) {
+  if (Math.abs(x - room.x * GRID_SIZE) <= handleSize && Math.abs(y - room.y * GRID_SIZE) <= handleSize) {
     return 'topLeft';
   }
-  if (Math.abs(x - (room.x + room.width * GRID_SIZE)) <= handleSize && Math.abs(y - room.y) <= handleSize) {
+  if (Math.abs(x - (room.x * GRID_SIZE + room.width * GRID_SIZE)) <= handleSize && Math.abs(y - room.y * GRID_SIZE) <= handleSize) {
     return 'topRight';
   }
-  if (Math.abs(x - room.x) <= handleSize && Math.abs(y - (room.y + room.length * GRID_SIZE)) <= handleSize) {
+  if (Math.abs(x - room.x * GRID_SIZE) <= handleSize && Math.abs(y - (room.y * GRID_SIZE + room.length * GRID_SIZE)) <= handleSize) {
     return 'bottomLeft';
   }
-  if (Math.abs(x - (room.x + room.width * GRID_SIZE)) <= handleSize && 
-      Math.abs(y - (room.y + room.length * GRID_SIZE)) <= handleSize) {
+  if (Math.abs(x - (room.x * GRID_SIZE + room.width * GRID_SIZE)) <= handleSize && 
+      Math.abs(y - (room.y * GRID_SIZE + room.length * GRID_SIZE)) <= handleSize) {
     return 'bottomRight';
   }
   
@@ -205,14 +196,14 @@ const getResizeHandleAtPoint = (x: number, y: number, room: IRoom, zoom: number)
 // Check if two rooms overlap
 const checkOverlap = (room1: IRoom, room2: IRoom) => {
   return !(
-    room1.x + room1.width * GRID_SIZE <= room2.x ||
-    room1.x >= room2.x + room2.width * GRID_SIZE ||
-    room1.y + room1.length * GRID_SIZE <= room2.y ||
-    room1.y >= room2.y + room2.length * GRID_SIZE
+    room1.x * GRID_SIZE + room1.width * GRID_SIZE <= room2.x * GRID_SIZE ||
+    room1.x * GRID_SIZE >= room2.x * GRID_SIZE + room2.width * GRID_SIZE ||
+    room1.y * GRID_SIZE + room1.length * GRID_SIZE <= room2.y * GRID_SIZE ||
+    room1.y * GRID_SIZE >= room2.y * GRID_SIZE + room2.length * GRID_SIZE
   );
 };
 
 // Check if a room overlaps with any other room
 const hasOverlap = (room: IRoom, rooms: IRoom[]) => {
-  return rooms.some(r => r.objectId !== room.objectId && checkOverlap(room, r));
+  return rooms.some(r => r.id !== room.id && checkOverlap(room, r));
 };

@@ -1,130 +1,147 @@
 'use client';
 
 import { IFloor } from '@/models/Floor';
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { IRoom } from '@/models/Room';
+import { createContext, useCallback, useContext, useState } from 'react';
+import { toast } from 'sonner';
+import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
 interface FloorContextValue {
-  // floor data
-  floors: IFloor[];
-  currentFloorIndex: number;
-  currentFloor: IFloor | null;
-
-  // loading states
-  isLoading: boolean;
-  error: string | null;
-
-  // actions
-  setCurrentFloorIndex: (index: number) => void;
-  refreshFloors: () => Promise<void>;
-  createFloor: () => Promise<void>;
+  floor: IFloor;
+  rooms: IRoom[];
+  updateFloorProperty: (key: keyof IFloor, value: unknown) => void;
+  addRoom: (room: IRoom) => void;
+  updateRoom: (roomId: string, updates: Partial<IRoom>) => void;
+  deleteRoom: (roomId: string) => void;
+  saveFloor: () => Promise<void>;
+  deleteFloor: () => Promise<void>;
+  isDeletingFloor: boolean;
+  isSavingFloor: boolean;
 }
 
-const FloorContext = createContext<FloorContextValue | undefined>(undefined);
+const floorContext = createContext<FloorContextValue | null>(null);
 
 interface FloorProviderProps {
-  children: ReactNode;
+  initialFloor: IFloor;
+  children: React.ReactNode;
 }
 
-export function FloorProvider({ children }: FloorProviderProps) {
-  const [floors, setFloors] = useState<IFloor[]>([]);
-  const [currentFloorIndex, setCurrentFloorIndex] = useState(0);
+export function FloorProvider({ initialFloor, children }: FloorProviderProps) {
+  const [floor, setFloor] = useState<IFloor>(initialFloor);
+  const [rooms, setRooms] = useState<IRoom[]>(initialFloor.rooms || []);
+  const router = useRouter();
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const updateFloorProperty = useCallback(
+    (key: keyof IFloor, value: unknown) => {
+      setFloor(prev => ({ ...prev, [key]: value }));
+    },
+    []
+  );
 
-  const currentFloor = floors[currentFloorIndex] || null;
+  const addRoom = useCallback((room: IRoom) => {
+    setRooms(prev => [...prev, room]);
+  }, []);
 
-  // fetch floors from API
-  const fetchFloors = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const updateRoom = useCallback((roomId: string, updates: Partial<IRoom>) => {
+    setRooms(prev =>
+      prev.map(room => (room.id === roomId ? { ...room, ...updates } : room))
+    );
+  }, []);
 
-      const response = await fetch('/api/floors');
+  const deleteRoom = useCallback((roomId: string) => {
+    setRooms(prev => prev.filter(room => room.id !== roomId));
+  }, []);
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch floors: ${response.statusText}`);
-      }
+  // SAVE FLOOR
 
-      const data = await response.json();
-
-      if (data.success) {
-        setFloors(data.data);
-
-        // Reset to first floor if current index is out of bounds
-        if (currentFloorIndex >= data.data.length) {
-          setCurrentFloorIndex(0);
-        }
-      } else {
-        throw new Error(data.error || 'Failed to fetch floors');
-      }
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'An unexpected error occurred';
-      setError(errorMessage);
-      console.error('Failed to fetch floors:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentFloorIndex]);
-
-  // create a new floor with a temporary name
-  const createFloor = async () => {
-    try {
-      const tempName = `Floor ${floors.length + 1}`;
-      const response = await fetch('api/floors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: tempName }),
+  const saveFloorMutation = useMutation({
+    mutationFn: async (floor: IFloor) => {
+      const response = await fetch(`/api/floors/${floor.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...floor,
+          rooms,
+        }),
       });
 
-      if (!response.ok)
-        throw new Error(`Failed to create floor: ${response.statusText}`);
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Send user to edit page for the new floor
-        window.location.href = `/floor-planner/${data.data.objectId}`;
+      if (!response.ok) {
+        throw new Error('Failed to save floor');
       }
-    } catch (error) {
-      console.error('Failed to create floor:', error);
-      throw error;
-    }
-  };
 
-  // Initial fetch
-  useEffect(() => {
-    fetchFloors();
-  }, [fetchFloors]);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast.success('Floor saved successfully!');
+    },
+    onError: error => {
+      toast.error('Failed to save floor. Please try again later.');
+      console.error('Error saving floor:', error);
+    },
+  });
 
-  const value: FloorContextValue = {
-    floors,
-    currentFloorIndex,
-    currentFloor,
-    isLoading,
-    error,
-    setCurrentFloorIndex,
-    refreshFloors: fetchFloors,
-    createFloor,
-  };
+  const saveFloor = useCallback(async () => {
+    if (saveFloorMutation.isPending) return;
+    await saveFloorMutation.mutateAsync({
+      ...floor,
+      rooms,
+    });
+  }, [floor, rooms, saveFloorMutation]);
+
+  // DELETE FLOOR
+
+  const deleteFloorMutation = useMutation({
+    mutationFn: async (floorId: string) => {
+      const response = await fetch(`/api/floors/${floorId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete floor');
+      }
+    },
+    onSuccess: () => {
+      toast.success('Floor deleted successfully! Redirecting...');
+      router.push('/');
+    },
+    onError: error => {
+      toast.error('Failed to delete floor. Please try again later.');
+      console.error('Error deleting floor:', error);
+    },
+  });
+
+  const deleteFloor = useCallback(async () => {
+    if (deleteFloorMutation.isPending) return;
+    await deleteFloorMutation.mutateAsync(floor.id);
+  }, [floor.id, deleteFloorMutation]);
 
   return (
-    <FloorContext.Provider value={value}>{children}</FloorContext.Provider>
+    <floorContext.Provider
+      value={{
+        floor,
+        rooms,
+        updateFloorProperty,
+        addRoom,
+        updateRoom,
+        deleteRoom,
+        saveFloor,
+        deleteFloor,
+        isDeletingFloor: deleteFloorMutation.isPending,
+        isSavingFloor: saveFloorMutation.isPending,
+      }}
+    >
+      {children}
+    </floorContext.Provider>
   );
 }
 
-export function useFloors() {
-  const context = useContext(FloorContext);
-  if (context === undefined) {
-    throw new Error('useFloors must be used within a FloorProvider');
+export function useFloor() {
+  const context = useContext(floorContext);
+  if (!context) {
+    throw new Error('useFloorContext must be used within a FloorProvider');
   }
   return context;
 }

@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useGesture } from '@use-gesture/react';
 import { CanvasState, InteractionMode } from '../floor-plan-editor';
+import { useFloor } from '@/contexts/floor-context';
+import { GRID_SIZE } from '../utils/grid';
 
 export function usePanZoom(
     containerRef: React.RefObject<HTMLElement | null>, 
@@ -9,6 +11,21 @@ export function usePanZoom(
 ) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
+  const hasInitializedPan = useRef(false);
+  const { floor } = useFloor();
+
+  if (!hasInitializedPan.current && containerRef.current) {
+    // Center the floor plan initially
+    hasInitializedPan.current = true;
+    if (floor.rooms) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setPan({
+        x: (rect.width - (floor.width ?? 0) * GRID_SIZE) / 2,
+        y: (rect.height - (floor.length ?? 0) * GRID_SIZE) / 2,
+      });
+      hasInitializedPan.current = true;
+    }
+  }
 
   const isPanningAllowed = canvasState === 'none' && interactionMode === 'select';
 

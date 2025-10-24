@@ -1,7 +1,7 @@
 import mongoose, { Document } from "mongoose";
 
 export interface IRoom {
-    objectId: string;
+    id: string;
     name: string;
     width: number;
     length: number;
@@ -10,9 +10,16 @@ export interface IRoom {
     color: string;
 }
 
-export interface IRoomDocument extends IRoom, Document {}
+export interface IRoomDocument extends Document {
+    name: string;
+    width: number;
+    length: number;
+    x: number;
+    y: number;
+    color: string;
+}
 
-const roomSchema = new mongoose.Schema<IRoomDocument>({
+export const roomSchema = new mongoose.Schema<IRoomDocument>({
     name: {
         type: String,
         required: true,
@@ -43,4 +50,14 @@ const roomSchema = new mongoose.Schema<IRoomDocument>({
     }
 });
 
-export default mongoose.models.Room || mongoose.model<IRoom>('Room', roomSchema);
+export function roomDocToDto(room: IRoomDocument): IRoom {
+    return {
+        id: room.id.toString(),
+        name: room.name,
+        width: room.width,
+        length: room.length,
+        x: room.x,
+        y: room.y,
+        color: room.color,
+    }
+}

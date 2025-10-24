@@ -17,19 +17,19 @@ export const drawRooms = (
   ctx.lineWidth = 2 / zoom;
 
   rooms.forEach(room => {
-    if (tempRoom && room.objectId === tempRoom.objectId) return; // skip temp room
+    if (tempRoom && room.id === tempRoom.id) return; // skip temp room
 
     ctx.strokeStyle = 'rgba(180, 180, 180, 1)';
     ctx.fillStyle = room.color + '50'; // semi-transparent fill
     ctx.fillRect(
-      room.x,
-      room.y,
+      room.x * GRID_SIZE,
+      room.y * GRID_SIZE,
       room.width * GRID_SIZE,
       room.length * GRID_SIZE
     );
     ctx.strokeRect(
-      room.x,
-      room.y,
+      room.x * GRID_SIZE,
+      room.y * GRID_SIZE,
       room.width * GRID_SIZE,
       room.length * GRID_SIZE
     );
@@ -39,10 +39,10 @@ export const drawRooms = (
     ctx.font = `${14 / zoom}px Inter, sans-serif`;
     ctx.fillText(
       room.name,
-      room.x +
+      room.x * GRID_SIZE +
         (room.width * GRID_SIZE) / 2 -
         ctx.measureText(room.name).width / 2,
-      room.y + (room.length * GRID_SIZE) / 2
+      room.y * GRID_SIZE + (room.length * GRID_SIZE) / 2
     );
   });
 
@@ -74,14 +74,14 @@ export const drawRooms = (
     ctx.lineWidth = 2 / zoom;
 
     ctx.fillRect(
-      tempRoom.x,
-      tempRoom.y,
+      tempRoom.x * GRID_SIZE,
+      tempRoom.y * GRID_SIZE,
       tempRoom.width * GRID_SIZE,
       tempRoom.length * GRID_SIZE
     );
     ctx.strokeRect(
-      tempRoom.x,
-      tempRoom.y,
+      tempRoom.x * GRID_SIZE,
+      tempRoom.y * GRID_SIZE,
       tempRoom.width * GRID_SIZE,
       tempRoom.length * GRID_SIZE
     );
@@ -93,8 +93,8 @@ export const drawRooms = (
       ctx.textAlign = 'center';
       ctx.fillText(
         tempRoom.name,
-        tempRoom.x + (tempRoom.width * GRID_SIZE) / 2,
-        tempRoom.y + (tempRoom.length * GRID_SIZE) / 2
+        tempRoom.x * GRID_SIZE + (tempRoom.width * GRID_SIZE) / 2,
+        tempRoom.y * GRID_SIZE + (tempRoom.length * GRID_SIZE) / 2
       );
     }
   }
@@ -105,7 +105,12 @@ export const drawRooms = (
 
     ctx.strokeStyle = '#2563eb'; // Highlight color
     ctx.lineWidth = 3 / zoom;
-    ctx.strokeRect(x, y, width * GRID_SIZE, length * GRID_SIZE);
+    ctx.strokeRect(
+      x * GRID_SIZE,
+      y * GRID_SIZE,
+      width * GRID_SIZE,
+      length * GRID_SIZE
+    );
 
     // Draw resize handles
     const handleSize = 10 / zoom;
@@ -113,32 +118,32 @@ export const drawRooms = (
 
     // Top-left handle
     ctx.fillRect(
-      x - handleSize / 2,
-      y - handleSize / 2,
+      x * GRID_SIZE - handleSize / 2,
+      y * GRID_SIZE - handleSize / 2,
       handleSize,
       handleSize
     );
 
     // Top-right handle
     ctx.fillRect(
-      x + width * GRID_SIZE - handleSize / 2,
-      y - handleSize / 2,
+      x * GRID_SIZE + width * GRID_SIZE - handleSize / 2,
+      y * GRID_SIZE - handleSize / 2,
       handleSize,
       handleSize
     );
 
     // Bottom-left handle
     ctx.fillRect(
-      x - handleSize / 2,
-      y + length * GRID_SIZE - handleSize / 2,
+      x * GRID_SIZE - handleSize / 2,
+      y * GRID_SIZE + length * GRID_SIZE - handleSize / 2,
       handleSize,
       handleSize
     );
 
     // Bottom-right handle
     ctx.fillRect(
-      x + width * GRID_SIZE - handleSize / 2,
-      y + length * GRID_SIZE - handleSize / 2,
+      x * GRID_SIZE + width * GRID_SIZE - handleSize / 2,
+      y * GRID_SIZE + length * GRID_SIZE - handleSize / 2,
       handleSize,
       handleSize
     );
@@ -149,14 +154,14 @@ export const drawRooms = (
     ctx.textAlign = 'center';
     ctx.fillText(
       `${width.toFixed(0)} m`,
-      x + (width * GRID_SIZE) / 2,
-      y + 24 / zoom
+      x * GRID_SIZE + (width * GRID_SIZE) / 2,
+      y * GRID_SIZE + 24 / zoom
     );
     ctx.textAlign = 'right';
     ctx.fillText(
       `${length.toFixed(0)} m`,
-      x + width * GRID_SIZE - 12 / zoom,
-      y + (length * GRID_SIZE) / 2
+      x * GRID_SIZE + width * GRID_SIZE - 12 / zoom,
+      y * GRID_SIZE + (length * GRID_SIZE) / 2
     );
   }
 };

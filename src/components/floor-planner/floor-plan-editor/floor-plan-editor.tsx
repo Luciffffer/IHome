@@ -1,20 +1,15 @@
 'use client';
 
-import { IFloor } from '@/models/Floor';
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { EditorToolbar } from './controls/editor-toolbar';
 import { CanvasRenderer } from './canvas/canvas-renderer';
 import { useDrawingMode } from './hooks/use-drawing-mode';
 import { useCanvasSize } from './hooks/use-canvas-size';
 import { usePanZoom } from './hooks/use-pan-zoom';
 import { useSelection } from './hooks/use-selection';
-import { IRoom } from '@/models/Room';
 import { RoomPropertiesPanel } from './controls/room-properties-panel';
-import { toast, Toaster } from 'sonner';
-
-interface FloorPlanEditorProps {
-  floor: IFloor;
-}
+import { useFloor } from '@/contexts/floor-context';
+import { Toaster } from '@/components/ui/sonner';
 
 export const DEFAULT_ROOM_COLORS = [
   '#ffadad',
@@ -77,9 +72,9 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
   }
 }
 
-export function FloorPlanEditor({ floor }: FloorPlanEditorProps) {
+export function FloorPlanEditor() {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [rooms, setRooms] = useState<IRoom[]>([]);
+  const { rooms, saveFloor } = useFloor();
 
   const [editorState, dispatch] = useReducer(editorReducer, {
     interactionMode: 'select',
@@ -108,8 +103,6 @@ export function FloorPlanEditor({ floor }: FloorPlanEditorProps) {
     editorState.interactionMode,
     pan,
     zoom,
-    rooms,
-    setRooms,
     (cursor: CursorClass) =>
       dispatch({ type: 'SET_CURSOR_STYLE', payload: cursor })
   );
@@ -128,9 +121,7 @@ export function FloorPlanEditor({ floor }: FloorPlanEditorProps) {
     editorState.canvasState,
     pan,
     zoom,
-    rooms,
     editorState.selectedRoomId,
-    setRooms,
     isResizing =>
       dispatch({
         type: isResizing ? 'START_RESIZING' : 'END_INTERACTION',
@@ -142,12 +133,6 @@ export function FloorPlanEditor({ floor }: FloorPlanEditorProps) {
     (roomId: string | null) =>
       dispatch({ type: 'SELECT_ROOM', payload: roomId })
   );
-
-  const saveFloor = useCallback(() => {
-    // TODO: Implement saving logic here
-    console.log('Saving floor...', { rooms });
-    toast.success('Floor has been saved successfully!');
-  }, [rooms]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -209,7 +194,7 @@ export function FloorPlanEditor({ floor }: FloorPlanEditorProps) {
     if (editorState.interactionMode === 'drawing') {
       const newRoom = handleDrawingPointerUp();
       if (newRoom) {
-        dispatch({ type: 'SELECT_ROOM', payload: newRoom.objectId });
+        dispatch({ type: 'SELECT_ROOM', payload: newRoom.id });
         dispatch({ type: 'SET_INTERACTION_MODE', payload: 'select' });
       }
     }
@@ -219,11 +204,6 @@ export function FloorPlanEditor({ floor }: FloorPlanEditorProps) {
     handleSelectionPointerUp,
     handleDrawingPointerUp,
   ]);
-
-  const handleRoomDelete = useCallback((roomId: string) => {
-    setRooms(prevRooms => prevRooms.filter(room => room.objectId !== roomId));
-    dispatch({ type: 'SELECT_ROOM', payload: null });
-  }, []);
 
   return (
     <div className="relative h-full w-full touch-none overflow-hidden">
@@ -262,7 +242,6 @@ export function FloorPlanEditor({ floor }: FloorPlanEditorProps) {
           pan={pan}
           zoom={zoom}
           onUpdateProperty={updateRoomProperty}
-          onDeleteRoom={handleRoomDelete}
         />
       )}
     </div>
