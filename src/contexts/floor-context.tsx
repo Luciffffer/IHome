@@ -14,7 +14,7 @@ interface FloorContextValue {
   addRoom: (room: IRoom) => void;
   updateRoom: (roomId: string, updates: Partial<IRoom>) => void;
   deleteRoom: (roomId: string) => void;
-  saveFloor: () => Promise<void>;
+  saveFloor: (override?: Partial<IFloor>) => Promise<void>;
   deleteFloor: () => Promise<void>;
   isDeletingFloor: boolean;
   isSavingFloor: boolean;
@@ -83,13 +83,17 @@ export function FloorProvider({ initialFloor, children }: FloorProviderProps) {
     },
   });
 
-  const saveFloor = useCallback(async () => {
-    if (saveFloorMutation.isPending) return;
-    await saveFloorMutation.mutateAsync({
-      ...floor,
-      rooms,
-    });
-  }, [floor, rooms, saveFloorMutation]);
+  const saveFloor = useCallback(
+    async (override?: Partial<IFloor>) => {
+      if (saveFloorMutation.isPending) return;
+      await saveFloorMutation.mutateAsync({
+        ...floor,
+        rooms,
+        ...override,
+      });
+    },
+    [floor, rooms, saveFloorMutation]
+  );
 
   // DELETE FLOOR
 

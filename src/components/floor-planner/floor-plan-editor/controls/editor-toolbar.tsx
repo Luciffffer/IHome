@@ -8,15 +8,13 @@ import { Spinner } from '@/components/ui/spinner';
 interface EditorToolbarProps {
   interactionMode: InteractionMode;
   onModeChange: (mode: InteractionMode) => void;
-  onSave: () => void;
 }
 
 export function EditorToolbar({
   interactionMode,
   onModeChange,
-  onSave,
 }: EditorToolbarProps) {
-  const { isSavingFloor } = useFloor();
+  const { isSavingFloor, saveFloor } = useFloor();
 
   return (
     <nav
@@ -56,7 +54,7 @@ export function EditorToolbar({
             size="lg"
             className="cursor-pointer"
             variant="ghost"
-            onClick={onSave}
+            onClick={() => saveFloor()}
           >
             {isSavingFloor ? <Spinner /> : <Save />}
             Save

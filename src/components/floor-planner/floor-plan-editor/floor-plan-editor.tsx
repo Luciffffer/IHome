@@ -136,7 +136,18 @@ export function FloorPlanEditor() {
 
   // Keyboard shortcuts
   useEffect(() => {
+    function isTypingTarget(target: EventTarget | null) {
+      if (!(target instanceof Element)) return false;
+      const tag = target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT')
+        return true;
+      if ((target as HTMLElement).isContentEditable) return true;
+      return false;
+    }
+
     function handleKeyDown(event: KeyboardEvent) {
+      if (isTypingTarget(event.target)) return;
+
       if (event.ctrlKey && event.key === 's') {
         event.preventDefault();
         saveFloor();
@@ -234,7 +245,6 @@ export function FloorPlanEditor() {
         onModeChange={mode =>
           dispatch({ type: 'SET_INTERACTION_MODE', payload: mode })
         }
-        onSave={saveFloor}
       />
       {selectedRoom && !isMoving && !isResizing && (
         <RoomPropertiesPanel
