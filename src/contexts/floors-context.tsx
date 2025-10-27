@@ -1,12 +1,11 @@
 'use client';
 
 import { IFloor } from '@/models/Floor';
-import { useMutation } from '@tanstack/react-query';
+import { QueryStatus, useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import {
   createContext,
   ReactNode,
-  useCallback,
   useContext,
   useEffect,
   useState,
@@ -20,8 +19,7 @@ interface FloorsContextValue {
   currentFloor: IFloor | null;
 
   // loading states
-  isLoading: boolean;
-  error: string | null;
+  floorsQueryStatus: QueryStatus;
   isCreatingFloor: boolean;
 
   // actions
@@ -40,45 +38,50 @@ export function FloorsProvider({ children }: FloorsProviderProps) {
   const [floors, setFloors] = useState<IFloor[]>([]);
   const [currentFloorIndex, setCurrentFloorIndex] = useState(0);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const router = useRouter();
   const currentFloor = floors[currentFloorIndex] || null;
 
   // fetch floors from API
-  const fetchFloors = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
+  const {
+    data: floorsQueryData,
+    status: floorsQueryStatus,
+    refetch: refreshFloors,
+  } = useQuery({
+    queryKey: ['floors'],
+    queryFn: async () => {
       const response = await fetch('/api/floors');
-
       if (!response.ok) {
         throw new Error(`Failed to fetch floors: ${response.statusText}`);
       }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setFloors(data.data);
-
-        // Reset to first floor if current index is out of bounds
-        if (currentFloorIndex >= data.data.length) {
-          setCurrentFloorIndex(0);
-        }
-      } else {
-        throw new Error(data.error || 'Failed to fetch floors');
+      const json = await response.json();
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to fetch floors');
       }
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'An unexpected error occurred';
-      setError(errorMessage);
-      console.error('Failed to fetch floors:', err);
-    } finally {
-      setIsLoading(false);
+      return json.data as IFloor[];
+    },
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+  });
+
+  useEffect(() => {
+    if (!floorsQueryData) return;
+
+    const hasChange =
+      JSON.stringify(floorsQueryData) !== JSON.stringify(floors);
+
+    console.log('Floors data changed:', hasChange);
+
+    if (hasChange) {
+      setFloors(floorsQueryData);
+
+      // Reset to first floor if current index is out of bounds
+      if (currentFloorIndex >= floorsQueryData.length) {
+        setCurrentFloorIndex(0);
+      }
     }
-  }, [currentFloorIndex]);
+  }, [floorsQueryData, currentFloorIndex, floors]);
 
   // create a new floor with a temporary name
 
@@ -109,20 +112,16 @@ export function FloorsProvider({ children }: FloorsProviderProps) {
     await createFloorMutation.mutateAsync();
   };
 
-  // Initial fetch
-  useEffect(() => {
-    fetchFloors();
-  }, [fetchFloors]);
-
   const value: FloorsContextValue = {
     floors,
     currentFloorIndex,
     currentFloor,
-    isLoading,
-    error,
+    floorsQueryStatus,
     isCreatingFloor: createFloorMutation.isPending,
     setCurrentFloorIndex,
-    refreshFloors: fetchFloors,
+    refreshFloors: async () => {
+      await refreshFloors();
+    },
     createFloor,
   };
 

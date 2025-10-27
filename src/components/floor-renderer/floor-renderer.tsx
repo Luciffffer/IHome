@@ -15,11 +15,16 @@ import { useFloors } from '@/contexts/floors-context';
 import { Spinner } from '../ui/spinner';
 import Logo from '../ui/logo';
 import Floor3DRenderer from './3d/floor-3d-renderer';
+import Toolbar from './controls/toolbar';
+import { CanvasStateProvider } from './contexts/canvas-state-context';
+import Link from 'next/link';
 
 const FloorRenderer = memo(function FloorRenderer() {
-  const { currentFloor, isLoading, error, createFloor, isCreatingFloor } =
+  const { currentFloor, floorsQueryStatus, createFloor, isCreatingFloor } =
     useFloors();
-  const isEmpty = !isLoading && !error && !currentFloor;
+
+  const isEmpty = floorsQueryStatus === 'success' && !currentFloor;
+  const noRooms = !isEmpty && currentFloor?.rooms.length === 0;
 
   return (
     <main
@@ -28,46 +33,58 @@ const FloorRenderer = memo(function FloorRenderer() {
         backgroundImage: 'url(/images/workbench-bg-graphic.svg)',
       }}
     >
-      {isLoading && (
-        <div className="bg-muted h-72 w-full flex items-center justify-center">
-          <Spinner className="size-12 text-muted-foreground" />
-        </div>
-      )}
+      <CanvasStateProvider>
+        {floorsQueryStatus === 'pending' && (
+          <div className="bg-muted h-72 w-full flex items-center justify-center">
+            <Spinner className="size-12 text-muted-foreground" />
+          </div>
+        )}
 
-      {isEmpty && (
-        <Empty className="bg-muted h-72">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Logo className="!w-9" />
-            </EmptyMedia>
-            <EmptyTitle>No Floors Defined Yet!</EmptyTitle>
-            <EmptyDescription>
-              Get started by adding a new floor to your smart home system.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button className="cursor-pointer" onClick={createFloor}>
-              {isCreatingFloor ? <Spinner /> : <Plus />}
-              Add Floor
-            </Button>
-          </EmptyContent>
-        </Empty>
-      )}
+        {isEmpty && (
+          <Empty className="bg-muted h-72">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Logo className="!w-9" />
+              </EmptyMedia>
+              <EmptyTitle>No Floors Defined Yet!</EmptyTitle>
+              <EmptyDescription>
+                Get started by adding a new floor to your smart home system.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button className="cursor-pointer" onClick={createFloor}>
+                {isCreatingFloor ? <Spinner /> : <Plus />}
+                Add floor
+              </Button>
+            </EmptyContent>
+          </Empty>
+        )}
 
-      {currentFloor && <Floor3DRenderer />}
+        {noRooms && (
+          <Empty className="bg-muted h-72">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Logo className="!w-9" />
+              </EmptyMedia>
+              <EmptyTitle>No Rooms on This Floor Yet!</EmptyTitle>
+              <EmptyDescription>
+                Add some rooms to get started.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button className="cursor-pointer" asChild>
+                <Link href={`/floor-planner/${currentFloor.id}`}>
+                  Edit floor
+                </Link>
+              </Button>
+            </EmptyContent>
+          </Empty>
+        )}
 
-      <nav
-        className="bg-white p-3 absolute bottom-6 left-1/2 -translate-x-1/2 rounded-md 
-          drop-shadow-md translate-y-[200%]"
-      >
-        <ul>
-          <li>
-            <button className="bg-primary p-3 rounded-md text-white">
-              <Plus />
-            </button>
-          </li>
-        </ul>
-      </nav>
+        {!noRooms && <Floor3DRenderer />}
+
+        <Toolbar hidden={!currentFloor} />
+      </CanvasStateProvider>
     </main>
   );
 });
