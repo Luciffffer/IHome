@@ -14,6 +14,7 @@ import { memo } from 'react';
 import { useFloors } from '@/contexts/floors-context';
 import { Spinner } from '../ui/spinner';
 import Logo from '../ui/logo';
+import Floor3DRenderer from './3d/floor-3d-renderer';
 
 const FloorRenderer = memo(function FloorRenderer() {
   const { currentFloor, isLoading, error, createFloor, isCreatingFloor } =
@@ -52,6 +53,8 @@ const FloorRenderer = memo(function FloorRenderer() {
           </EmptyContent>
         </Empty>
       )}
+
+      {currentFloor && <Floor3DRenderer />}
 
       <nav
         className="bg-white p-3 absolute bottom-6 left-1/2 -translate-x-1/2 rounded-md 
