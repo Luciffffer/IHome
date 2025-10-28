@@ -1,22 +1,11 @@
-import { auth } from "@/auth";
-import { requireAdmin } from "@/lib/auth-helpers";
+import { requireAdmin, requireAuth } from "@/lib/auth-helpers";
 import { handleError } from "@/lib/error-handler";
 import { FloorService } from "@/services/FloorService";
 import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        const session = await auth();
-
-        if (!session?.user?.email) {
-            return NextResponse.json(
-                { 
-                    success: 0,
-                    error: 'Unauthorized'
-                }, { status: 401 }
-            )
-        }
-
+        requireAuth();
         const floors = await FloorService.getFloors();
 
         return NextResponse.json(
@@ -26,13 +15,7 @@ export async function GET() {
             }, { status: 200 }
         );
     } catch (error) {
-        console.error("Error fetching floors:", error);
-        return NextResponse.json(
-            { 
-                success: 0,
-                error: 'Internal Server Error' 
-            }, { status: 500 }
-        );
+        return handleError(error);
     }
 }
 
@@ -52,6 +35,6 @@ export async function POST(request: Request) {
             }, { status: 201 }
         );
     } catch (error) {
-        handleError(error);
+        return handleError(error);
     }
 }

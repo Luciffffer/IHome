@@ -5,10 +5,10 @@ import { PerspectiveCamera } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { useCanvasState } from '../contexts/canvas-state-context';
+import { useFloorUI } from '../../../contexts/floor-ui-context';
 
 function Camera() {
-  const { viewMode } = useCanvasState();
+  const { viewMode, isAddDeviceMenuOpen, sideMenuMode } = useFloorUI();
   const { currentFloor: floor } = useFloors();
   const { size, camera, gl, invalidate } = useThree();
   const [containerSize, setContainerSize] = useState({
@@ -24,10 +24,6 @@ function Camera() {
 
   const centerX = floor!.width! / 2;
   const centerY = floor!.length! / 2;
-  const center = useMemo(
-    () => new THREE.Vector3(centerX, 0, centerY),
-    [centerX, centerY]
-  );
 
   // Calculate camera settings
   const { position2D, quat2D, position3D, quat3D, fov } = useMemo(() => {
@@ -43,19 +39,36 @@ function Camera() {
     const canvasH = containerSize.height || size.height;
     const aspect = canvasW / Math.max(1, canvasH);
 
-    const requiredWorldHeight = floorL / 0.8;
-    const requiredWorldWidth = floorW / 0.8;
+    const verticalCoverage = isAddDeviceMenuOpen ? 0.75 : 0.8;
+    const horizontalCoverage = sideMenuMode !== 'closed' ? 0.65 : 0.8;
+
+    const requiredWorldHeight = floorL / verticalCoverage;
+    const requiredWorldWidth = floorW / horizontalCoverage;
 
     const distanceForHeight = requiredWorldHeight / (2 * halfV);
     const distanceForWidth = requiredWorldWidth / (2 * halfV * aspect);
 
     const distanceBase = Math.max(distanceForHeight, distanceForWidth);
 
-    const pos2D = new THREE.Vector3(centerX, distanceBase * 1.2, centerY);
+    const verticalOffset = isAddDeviceMenuOpen ? floorL * 0.1 : floorL * 0.05;
+    const horizontalOffset = sideMenuMode !== 'closed' ? floorW * 0.15 : 0;
+
+    const pos2D = new THREE.Vector3(
+      centerX + horizontalOffset,
+      distanceBase * 1.2,
+      centerY + verticalOffset
+    );
     const pos3D = new THREE.Vector3(
-      centerX,
+      centerX + horizontalOffset,
       distanceBase * 0.9,
-      centerY + distanceBase * 0.7
+      centerY + distanceBase * 0.7 + verticalOffset
+    );
+
+    // Look at center with offset
+    const lookAtCenter = new THREE.Vector3(
+      centerX + horizontalOffset,
+      0,
+      centerY + verticalOffset
     );
 
     // helper to compute quaternion that looks at center
@@ -67,8 +80,8 @@ function Camera() {
       return q;
     }
 
-    const q2D = lookQuat(pos2D, center);
-    const q3D = lookQuat(pos3D, center);
+    const q2D = lookQuat(pos2D, lookAtCenter);
+    const q3D = lookQuat(pos3D, lookAtCenter);
 
     return {
       position2D: pos2D,
@@ -81,11 +94,12 @@ function Camera() {
     floor,
     centerX,
     centerY,
-    center,
     containerSize.width,
     containerSize.height,
     size.width,
     size.height,
+    isAddDeviceMenuOpen,
+    sideMenuMode,
   ]);
 
   // initialize camera immediately on mount and when targets change

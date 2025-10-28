@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from './button';
 import { X } from 'lucide-react';
@@ -9,13 +9,36 @@ import { ScrollArea, ScrollBar } from './scroll-area';
 interface SidePopupMenuProps extends React.HTMLAttributes<HTMLDivElement> {
   side?: 'left' | 'right';
   isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onAnimationComplete?: () => void;
 }
 
-function SidePopupMenu({ side, isOpen, children }: SidePopupMenuProps) {
-  const [open, setOpen] = useState(isOpen ?? false);
+function SidePopupMenu({
+  side,
+  isOpen: controlledOpen,
+  onOpenChange,
+  onAnimationComplete,
+  children,
+}: SidePopupMenuProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
 
-  const closeMenu = () => setOpen(false);
-  const toggleMenu = () => setOpen(!open);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+
+  const closeMenu = () => {
+    if (isControlled) {
+      onOpenChange?.(false);
+    } else {
+      setInternalOpen(false);
+    }
+  };
+  const toggleMenu = () => {
+    if (isControlled) {
+      onOpenChange?.(!controlledOpen);
+    } else {
+      setInternalOpen(!internalOpen);
+    }
+  };
 
   return (
     <>
@@ -32,6 +55,7 @@ function SidePopupMenu({ side, isOpen, children }: SidePopupMenuProps) {
           return React.cloneElement(child, {
             isOpen: open,
             onClose: closeMenu,
+            onAnimationComplete,
             side,
           } as SidePopupMenuContentProps);
         }
@@ -57,18 +81,21 @@ interface SidePopupMenuContentProps
   side?: 'left' | 'right';
   isOpen?: boolean;
   onClose?: () => void;
+  onAnimationComplete?: () => void;
 }
 
 function SidePopupMenuContent({
   side = 'right',
   isOpen = false,
   onClose,
+  onAnimationComplete,
   children,
   className,
   ...props
 }: SidePopupMenuContentProps) {
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [visible, setVisible] = useState(false);
+  const previousIsOpen = useRef(isOpen);
 
   useEffect(() => {
     if (isOpen) {
@@ -82,10 +109,21 @@ function SidePopupMenuContent({
       return () => clearTimeout(id);
     } else {
       setVisible(false);
-      const timeout = setTimeout(() => setShouldRender(false), 300);
+      const timeout = setTimeout(() => {
+        setShouldRender(false);
+
+        if (previousIsOpen.current && !isOpen) {
+          onAnimationComplete?.();
+        }
+      }, 300);
+
       return () => clearTimeout(timeout);
     }
-  }, [isOpen, shouldRender]);
+  }, [isOpen, shouldRender, onAnimationComplete]);
+
+  useEffect(() => {
+    previousIsOpen.current = isOpen;
+  }, [isOpen]);
 
   if (!shouldRender) return null;
 

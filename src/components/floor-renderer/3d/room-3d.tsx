@@ -3,6 +3,8 @@ import { Text } from '@react-three/drei';
 import { useMemo } from 'react';
 import * as THREE from 'three';
 import { FLOOR_HEIGHT } from './utils/constants';
+import GridOverlay from './grid-overlay';
+import { useFloorUI } from '../../../contexts/floor-ui-context';
 
 function makeFloorGradient(color: string) {
   const size = 256;
@@ -36,6 +38,8 @@ interface Room3DProps {
 }
 
 function Room3D({ room }: Room3DProps) {
+  const { isPlacingDevice } = useFloorUI();
+
   const width = room.width;
   const length = room.length;
 
@@ -95,6 +99,16 @@ function Room3D({ room }: Room3DProps) {
       >
         {room.name}
       </Text>
+
+      {/* Grid during device placement */}
+      {isPlacingDevice && (
+        <GridOverlay
+          x={room.x}
+          z={room.y}
+          width={room.width}
+          length={room.length}
+        />
+      )}
     </group>
   );
 }

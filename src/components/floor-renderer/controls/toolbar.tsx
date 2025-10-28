@@ -2,14 +2,22 @@
 
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
-import { useCanvasState } from '../contexts/canvas-state-context';
+import { Plus, SidebarClose, SidebarOpen } from 'lucide-react';
+import { useFloorUI } from '../../../contexts/floor-ui-context';
 
 interface ToolbarProps {
   hidden?: boolean;
 }
 
 function Toolbar({ hidden = false }: ToolbarProps) {
-  const { viewMode, toggleViewMode } = useCanvasState();
+  const {
+    viewMode,
+    toggleViewMode,
+    openAddDeviceMenu,
+    openDeviceList,
+    closeSideMenu,
+    sideMenuMode,
+  } = useFloorUI();
   const [shown, setShown] = useState(!hidden);
   const [visible, setVisible] = useState(false);
 
@@ -43,7 +51,39 @@ function Toolbar({ hidden = false }: ToolbarProps) {
       <ul className="h-14 flex items-center justify-center gap-3 px-2 *:[li]:py-2">
         <li>
           <Button
-            aria-label="Selection mode"
+            aria-label="Add smart home devices"
+            size="icon-lg"
+            variant="ghost"
+            className="cursor-pointer *:[svg]:!w-5 *:[svg]:!h-5"
+            onClick={() => openAddDeviceMenu()}
+          >
+            <Plus />
+          </Button>
+        </li>
+        <li>
+          <Button
+            aria-label="Open list of devices"
+            size="icon-lg"
+            variant="ghost"
+            className="cursor-pointer *:[svg]:!w-5 *:[svg]:!h-5"
+            onClick={() => {
+              if (sideMenuMode === 'device-list') {
+                closeSideMenu();
+              } else {
+                openDeviceList();
+              }
+            }}
+          >
+            {sideMenuMode === 'device-list' ? (
+              <SidebarOpen />
+            ) : (
+              <SidebarClose />
+            )}
+          </Button>
+        </li>
+        <li>
+          <Button
+            aria-label="Toggle between 2D and 3D view"
             size="icon-lg"
             variant="ghost"
             className="cursor-pointer *:[svg]:!w-5 *:[svg]:!h-5"

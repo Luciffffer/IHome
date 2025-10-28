@@ -1,3 +1,4 @@
+import { FloorUIProvider } from '@/contexts/floor-ui-context';
 import FloorRenderer from '@/components/floor-renderer/floor-renderer';
 import { FloorSwitcher } from '@/components/floor-switcher';
 import { Header } from '@/components/layout/header';
@@ -7,16 +8,18 @@ import { FloorsProvider } from '@/contexts/floors-context';
 function Home() {
   return (
     <FloorsProvider>
-      <div className="h-svh flex flex-col">
-        <Header>
-          <div className="w-full">
-            <Logo className="w-9" />
-          </div>
-          <FloorSwitcher />
-        </Header>
+      <FloorUIProvider>
+        <div className="h-svh flex flex-col">
+          <Header>
+            <div className="w-full">
+              <Logo className="w-9" />
+            </div>
+            <FloorSwitcher />
+          </Header>
 
-        <FloorRenderer />
-      </div>
+          <FloorRenderer />
+        </div>
+      </FloorUIProvider>
     </FloorsProvider>
   );
 }
