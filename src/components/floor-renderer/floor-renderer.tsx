@@ -25,7 +25,7 @@ import SideMenu from './controls/side-menu';
 const FloorRenderer = memo(function FloorRenderer() {
   const { currentFloor, floorsQueryStatus, createFloor, isCreatingFloor } =
     useFloors();
-  const { isAddDeviceMenuOpen, sideMenuMode } = useFloorUI();
+  const { isAddDeviceMenuOpen } = useFloorUI();
 
   const isLoading = floorsQueryStatus === 'pending';
   const isEmpty = floorsQueryStatus === 'success' && !currentFloor;
@@ -93,7 +93,7 @@ const FloorRenderer = memo(function FloorRenderer() {
 
       {hasRooms && <Floor3DRenderer />}
 
-      <Toolbar hidden={noRooms || isAddDeviceMenuOpen} />
+      <Toolbar hidden={isEmpty || noRooms || isAddDeviceMenuOpen} />
 
       {isAddDeviceMenuOpen && <AddDeviceList />}
 

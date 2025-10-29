@@ -21,7 +21,7 @@ const addDeviceSchema = z.object({
 });
 
 function AddDeviceForm() {
-  const { pendingDevice, closeSideMenu } = useFloorUI();
+  const { pendingDevice, closeSideMenu, openDeviceDetail } = useFloorUI();
   const { createDevice, isCreatingDevice } = useFloors();
 
   const form = useForm({
@@ -38,20 +38,21 @@ function AddDeviceForm() {
   }, [pendingDevice, form]);
 
   const handleFormSubmit = async (data: z.infer<typeof addDeviceSchema>) => {
-    console.log('Form submitted with data:', data);
+    if (!pendingDevice) return;
 
     const newDevice = {
       id: '', // ID will be assigned by the backend
       name: data.name,
-      type: pendingDevice?.type || 'light',
+      type: pendingDevice!.type!,
       upcCode: data.upcCode,
-      roomId: pendingDevice?.roomId || '',
-      x: pendingDevice?.x || 0,
-      y: pendingDevice?.y || 0,
+      roomId: pendingDevice!.roomId!,
+      x: pendingDevice!.x!,
+      y: pendingDevice!.y!,
       description: data.description,
     };
 
-    createDevice(newDevice);
+    const createdDevice = await createDevice(newDevice);
+    openDeviceDetail(createdDevice);
   };
 
   return (

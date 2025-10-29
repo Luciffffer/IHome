@@ -32,12 +32,12 @@ export async function POST(request: NextRequest) {
     requireAdmin();
     const body = await request.json();
 
-    await DeviceService.createDevice(body);
+    const device = await DeviceService.createDevice(body);
 
     return NextResponse.json(
       { 
         success: 1,
-        data: body
+        data: device
       }, { status: 201 }
     );
   } catch (error) {

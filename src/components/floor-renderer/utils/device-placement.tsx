@@ -1,13 +1,19 @@
-import { DeviceType } from '@/models/Device';
+import { DeviceType, IDevice } from '@/models/Device';
 import { IRoom } from '@/models/Room';
 import * as THREE from 'three';
 
 const WALL_SNAP_DISTANCE = 0.3; // units in 3D space
+const DEVICE_COLLISION_DISTANCE = 0.8;
 
 interface PlacementValidation {
   isValid: boolean;
   reason?: string;
-  snappedPosition?: { x: number; z: number };
+  snappedPosition: { x: number; z: number };
+}
+
+// Snap coordinate to grid (1x1 blocks, center of each block)
+function snapToGrid(value: number): number {
+  return Math.floor(value) + 0.5;
 }
 
 /**
@@ -27,6 +33,7 @@ function isNearWall(
   const pointVec = new THREE.Vector2(x - x1, z - z1);
 
   const wallLength = wallVec.length();
+
   if (wallLength === 0) return { isNear: false };
 
   const t = Math.max(
@@ -84,13 +91,41 @@ function getRoomWalls(
 }
 
 /**
+ * Check if position overlaps with any existing device
+ */
+function hasDeviceCollision(
+  x: number,
+  z: number,
+  existingDevices: IDevice[]
+): boolean {
+  return existingDevices.some(device => {
+    const distance = Math.sqrt((x - device.x) ** 2 + (z - device.y) ** 2);
+    return distance < DEVICE_COLLISION_DISTANCE;
+  });
+}
+
+/**
+ * Check if room already has a device of this type
+ */
+function roomHasDeviceType(
+  deviceType: DeviceType,
+  roomId: string,
+  existingDevices: IDevice[]
+): boolean {
+  return existingDevices.some(
+    device => device.type === deviceType && device.roomId === roomId
+  );
+}
+
+/**
  * Validate device placement based on type and position
  */
 export function validateDevicePlacement(
   deviceType: DeviceType,
   x: number,
   z: number,
-  rooms: IRoom[]
+  rooms: IRoom[],
+  existingDevices: IDevice[]
 ): PlacementValidation {
   const room = findContainingRoom(x, z, rooms);
 
@@ -98,6 +133,18 @@ export function validateDevicePlacement(
     return {
       isValid: false,
       reason: 'Device must be placed inside a room',
+      snappedPosition: { x: snapToGrid(x), z: snapToGrid(z) },
+    };
+  }
+
+  const snappedX = snapToGrid(x);
+  const snappedZ = snapToGrid(z);
+
+  if (hasDeviceCollision(snappedX, snappedZ, existingDevices)) {
+    return {
+      isValid: false,
+      reason: 'Too close to another device',
+      snappedPosition: { x: snappedX, z: snappedZ },
     };
   }
 
@@ -106,7 +153,11 @@ export function validateDevicePlacement(
       // Door locks must be near a wall
       const walls = getRoomWalls(room);
       for (const wall of walls) {
-        const { isNear, snappedX, snappedZ } = isNearWall(
+        const {
+          isNear,
+          snappedX: wallX,
+          snappedZ: wallZ,
+        } = isNearWall(
           x,
           z,
           wall.x1,
@@ -116,25 +167,67 @@ export function validateDevicePlacement(
           WALL_SNAP_DISTANCE
         );
         if (isNear && snappedX !== undefined && snappedZ !== undefined) {
+          // check collision at snapped wall position
+          if (hasDeviceCollision(snappedX, snappedZ, existingDevices)) {
+            return {
+              isValid: false,
+              reason: 'Too close to another device',
+              snappedPosition: { x: snappedX, z: snappedZ },
+            };
+          }
           return {
             isValid: true,
-            snappedPosition: { x: snappedX, z: snappedZ },
+            snappedPosition: { x: wallX!, z: wallZ! },
           };
         }
       }
       return {
         isValid: false,
         reason: 'Door locks must be placed on a wall',
+        snappedPosition: { x: snappedX, z: snappedZ },
       };
     }
 
-    case 'light':
-    case 'thermostat':
-    case 'audio':
-      // These can be placed anywhere in the room
-      return { isValid: true };
+    case 'thermostat': {
+      if (roomHasDeviceType(deviceType, room.id, existingDevices)) {
+        return {
+          isValid: false,
+          reason: 'Only one thermostat allowed per room',
+          snappedPosition: { x: snappedX, z: snappedZ },
+        };
+      }
+      return {
+        isValid: true,
+        snappedPosition: { x: snappedX, z: snappedZ },
+      };
+    }
+
+    case 'audio': {
+      if (roomHasDeviceType(deviceType, room.id, existingDevices)) {
+        return {
+          isValid: false,
+          reason: 'Only one audio device allowed per room',
+          snappedPosition: { x: snappedX, z: snappedZ },
+        };
+      }
+      return {
+        isValid: true,
+        snappedPosition: { x: snappedX, z: snappedZ },
+      };
+    }
+
+    case 'light': {
+      return {
+        isValid: true,
+        snappedPosition: { x: snappedX, z: snappedZ },
+      };
+    }
 
     default:
-      return { isValid: false, reason: 'Unknown device type' };
+      return {
+        isValid: false,
+        reason: 'Unknown device type',
+        snappedPosition: { x: snapToGrid(x), z: snapToGrid(z) },
+      };
   }
 }

@@ -8,7 +8,7 @@ import * as THREE from 'three';
 import { useFloorUI } from '../../../contexts/floor-ui-context';
 
 function Camera() {
-  const { viewMode, isAddDeviceMenuOpen, sideMenuMode } = useFloorUI();
+  const { viewMode, isAddDeviceMenuOpen, sideMenuOpen } = useFloorUI();
   const { currentFloor: floor } = useFloors();
   const { size, camera, gl, invalidate } = useThree();
   const [containerSize, setContainerSize] = useState({
@@ -40,7 +40,7 @@ function Camera() {
     const aspect = canvasW / Math.max(1, canvasH);
 
     const verticalCoverage = isAddDeviceMenuOpen ? 0.75 : 0.8;
-    const horizontalCoverage = sideMenuMode !== 'closed' ? 0.65 : 0.8;
+    const horizontalCoverage = sideMenuOpen ? 0.65 : 0.8;
 
     const requiredWorldHeight = floorL / verticalCoverage;
     const requiredWorldWidth = floorW / horizontalCoverage;
@@ -51,7 +51,7 @@ function Camera() {
     const distanceBase = Math.max(distanceForHeight, distanceForWidth);
 
     const verticalOffset = isAddDeviceMenuOpen ? floorL * 0.1 : floorL * 0.05;
-    const horizontalOffset = sideMenuMode !== 'closed' ? floorW * 0.15 : 0;
+    const horizontalOffset = sideMenuOpen ? floorW * 0.15 : 0;
 
     const pos2D = new THREE.Vector3(
       centerX + horizontalOffset,
@@ -99,7 +99,7 @@ function Camera() {
     size.width,
     size.height,
     isAddDeviceMenuOpen,
-    sideMenuMode,
+    sideMenuOpen,
   ]);
 
   // initialize camera immediately on mount and when targets change

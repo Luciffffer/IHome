@@ -18,11 +18,6 @@ import DevicePreview from './device-3d-preview';
 import { IDevice } from '@/models/Device';
 import Device3DPending from './device-3d-pending';
 
-// Snap coordinate to grid (1x1 blocks, center of each block)
-function snapToGrid(value: number): number {
-  return Math.floor(value) + 0.5;
-}
-
 function Floor3DScene() {
   const { currentFloor: floor, devices } = useFloors();
   const { placingDeviceType, cancelPlacingDevice, openDeviceForm } =
@@ -32,6 +27,7 @@ function Floor3DScene() {
     [number, number, number] | null
   >(null);
   const [isValidPlacement, setIsValidPlacement] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const planeRef = useRef<THREE.Mesh>(null);
 
   const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
@@ -43,26 +39,20 @@ function Floor3DScene() {
     // Get pointer position on the floor plane
     const point = event.point;
 
-    // Snap to grid (center of 1x1 blocks)
-    let snappedX = snapToGrid(point.x);
-    let snappedZ = snapToGrid(point.z);
-
     // Validate placement
     const validation = validateDevicePlacement(
       placingDeviceType,
-      snappedX,
-      snappedZ,
-      floor.rooms ?? []
+      point.x,
+      point.z,
+      floor.rooms ?? [],
+      devices ?? []
     );
 
-    // If device needs wall snapping (door lock), use snapped position
-    if (validation.snappedPosition) {
-      snappedX = validation.snappedPosition.x;
-      snappedZ = validation.snappedPosition.z;
-    }
+    const { x, z } = validation.snappedPosition;
 
-    setPreviewPosition([snappedX, 0.05, snappedZ]);
+    setPreviewPosition([x, 0.05, z]);
     setIsValidPlacement(validation.isValid);
+    setValidationError(validation.isValid ? null : validation.reason!);
   };
 
   const handlePointerLeave = () => {
@@ -72,7 +62,7 @@ function Floor3DScene() {
   const handleFloorClick = () => {
     if (!placingDeviceType || !floor || !previewPosition || !isValidPlacement) {
       if (!isValidPlacement && placingDeviceType) {
-        toast.error('Cannot place device here');
+        toast.error('Cannot place device here: ' + validationError);
       }
       return;
     }
@@ -96,7 +86,6 @@ function Floor3DScene() {
     cancelPlacingDevice();
     setPreviewPosition(null);
     openDeviceForm(pendingDevice);
-    toast.success('Device placed successfully');
   };
 
   return (

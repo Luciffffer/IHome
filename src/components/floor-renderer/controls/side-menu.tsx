@@ -6,42 +6,59 @@ import {
   SidePopupMenuHeader,
 } from '@/components/ui/side-popup-menu';
 import { useFloorUI } from '../../../contexts/floor-ui-context';
-import { useEffect, useRef, useState } from 'react';
 import AddDeviceForm from './add-dervice-form';
+import DeviceDetails from './device-details';
+import { useEffect, useState } from 'react';
+import { useFloors } from '@/contexts/floors-context';
 
 function SideMenu() {
-  const { sideMenuMode, closeSideMenu, pendingDevice } = useFloorUI();
-  const [displayMode, setDisplayMode] = useState(sideMenuMode);
-  const previousMode = useRef(sideMenuMode);
+  const {
+    sideMenuOpen,
+    sideMenuMode,
+    resetSideMenuState,
+    closeSideMenu,
+    pendingDevice,
+    selectedDeviceId,
+  } = useFloorUI();
+  const [open, setOpen] = useState(sideMenuOpen);
+  const { devices } = useFloors();
+
+  const selectedDevice = devices?.find(d => d.id === selectedDeviceId);
 
   useEffect(() => {
-    if (sideMenuMode !== 'closed') {
-      setDisplayMode(sideMenuMode);
-    }
-    previousMode.current = sideMenuMode;
-  }, [sideMenuMode]);
+    setOpen(sideMenuOpen);
+  }, [sideMenuOpen]);
 
   return (
     <SidePopupMenu
-      isOpen={sideMenuMode !== 'closed'}
+      isOpen={open}
       side="right"
-      onOpenChange={open => !open && closeSideMenu()}
+      onOpenChange={closeSideMenu}
+      onAnimationComplete={() => {
+        resetSideMenuState();
+      }}
     >
       <SidePopupMenuContent className="top-16 bottom-28">
         <SidePopupMenuHeader>
           <h2 className="font-heading-2xs">
-            {displayMode === 'device-list' && 'Devices'}
-            {displayMode === 'device-form' &&
+            {sideMenuMode === 'device-list' && 'Devices'}
+            {sideMenuMode === 'device-form' &&
               `Add ${
                 pendingDevice != null
                   ? pendingDevice!.type!.charAt(0)?.toUpperCase() +
                     pendingDevice!.type!.slice(1)
                   : 'Device'
               }`}
-            {displayMode === 'device-details' && 'Device Details'}
+            {sideMenuMode === 'device-details' &&
+              `${
+                selectedDevice != null
+                  ? selectedDevice.name.charAt(0).toUpperCase() +
+                    selectedDevice.name.slice(1)
+                  : 'Device'
+              } Details`}
           </h2>
         </SidePopupMenuHeader>
-        {displayMode === 'device-list' && (
+        {sideMenuMode === 'device-list' && (
           <>
             <ul>
               <li>Item 1</li>
@@ -51,7 +68,8 @@ function SideMenu() {
             </ul>
           </>
         )}
-        {displayMode === 'device-form' && <AddDeviceForm />}
+        {sideMenuMode === 'device-form' && <AddDeviceForm />}
+        {sideMenuMode === 'device-details' && <DeviceDetails />}
       </SidePopupMenuContent>
     </SidePopupMenu>
   );

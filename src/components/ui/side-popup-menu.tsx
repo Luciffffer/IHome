@@ -6,8 +6,12 @@ import { Button } from './button';
 import { X } from 'lucide-react';
 import { ScrollArea, ScrollBar } from './scroll-area';
 
+const ANIMATION_MS = 300;
+
+type Side = 'left' | 'right';
+
 interface SidePopupMenuProps extends React.HTMLAttributes<HTMLDivElement> {
-  side?: 'left' | 'right';
+  side?: Side;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   onAnimationComplete?: () => void;
@@ -40,45 +44,57 @@ function SidePopupMenu({
     }
   };
 
+  let triggerElement: React.ReactElement | null = null;
+  let contentElement: React.ReactElement | null = null;
+
+  React.Children.forEach(children, child => {
+    if (!React.isValidElement(child)) return;
+
+    if (child.type === SidePopupMenuTrigger) {
+      triggerElement = child;
+    } else if (child.type === SidePopupMenuContent) {
+      contentElement = child;
+    }
+  });
+
   return (
     <>
-      {React.Children.map(children, child => {
-        if (!React.isValidElement(child)) return child;
+      {triggerElement &&
+        React.cloneElement(triggerElement, {
+          onClick: toggleMenu,
+        })}
 
-        if (child.type === SidePopupMenuTrigger) {
-          return React.cloneElement(child, {
-            onClick: toggleMenu,
-          } as SidePopupMenuTriggerProps);
-        }
-
-        if (child.type === SidePopupMenuContent) {
-          return React.cloneElement(child, {
-            isOpen: open,
-            onClose: closeMenu,
-            onAnimationComplete,
-            side,
-          } as SidePopupMenuContentProps);
-        }
-      })}
+      {contentElement &&
+        React.cloneElement(contentElement, {
+          isOpen: open,
+          onClose: closeMenu,
+          onAnimationComplete,
+          side,
+        })}
     </>
   );
 }
 
 interface SidePopupMenuTriggerProps
-  extends React.HTMLAttributes<HTMLButtonElement> {
+  extends React.HTMLAttributes<HTMLDivElement> {
   onClick?: () => void;
 }
 
 function SidePopupMenuTrigger({
   onClick,
   children,
+  ...rest
 }: SidePopupMenuTriggerProps) {
-  return <div onClick={onClick}>{children}</div>;
+  return (
+    <div onClick={onClick} {...rest}>
+      {children}
+    </div>
+  );
 }
 
 interface SidePopupMenuContentProps
   extends React.HTMLAttributes<HTMLDivElement> {
-  side?: 'left' | 'right';
+  side?: Side;
   isOpen?: boolean;
   onClose?: () => void;
   onAnimationComplete?: () => void;
@@ -94,49 +110,54 @@ function SidePopupMenuContent({
   ...props
 }: SidePopupMenuContentProps) {
   const [shouldRender, setShouldRender] = useState(isOpen);
-  const [visible, setVisible] = useState(false);
-  const previousIsOpen = useRef(isOpen);
+  const [visible, setVisible] = useState(isOpen);
+
+  const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       setShouldRender(true);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (isOpen && shouldRender) {
-      const id = setTimeout(() => setVisible(true), 10);
+      const id = setTimeout(() => setVisible(true), 30);
       return () => clearTimeout(id);
     } else {
       setVisible(false);
-      const timeout = setTimeout(() => {
+      timeoutRef.current = window.setTimeout(() => {
         setShouldRender(false);
+        onAnimationComplete?.();
+      }, ANIMATION_MS);
 
-        if (previousIsOpen.current && !isOpen) {
-          onAnimationComplete?.();
+      return () => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
         }
-      }, 300);
-
-      return () => clearTimeout(timeout);
+      };
     }
-  }, [isOpen, shouldRender, onAnimationComplete]);
+  }, [isOpen, onAnimationComplete]);
 
+  // Cleanup timers
   useEffect(() => {
-    previousIsOpen.current = isOpen;
-  }, [isOpen]);
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   if (!shouldRender) return null;
 
   return createPortal(
     <div
       className={`fixed top-6 bottom-0 pb-6 z-10 p-6 max-w-96 w-full
-        opacity-0 transition-all duration-300 ease-in-out pointer-events-none
+        transition-all duration-300 ease-in-out pointer-events-none
         ${
           side === 'left'
             ? 'left-0 -translate-x-1/3'
             : 'right-0 translate-x-1/3'
         } 
-        ${visible ? 'opacity-100 !translate-x-0' : ''} 
+        ${
+          visible
+            ? 'opacity-100 !translate-x-0 pointer-events-auto'
+            : 'pointer-events-none opacity-0'
+        } 
         ${className}`}
       {...props}
     >

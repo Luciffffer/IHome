@@ -1,6 +1,7 @@
 import dbConnect from "@/lib/db";
-import Device, { getDefaultDeviceState, IDevice } from "@/models/Device";
+import Device, { deviceDocToDto, getDefaultDeviceState, IDevice } from "@/models/Device";
 import { FloorService } from "./FloorService";
+import { NotFoundError } from "@/lib/errors";
 
 export class DeviceService {
   // Get
@@ -19,7 +20,7 @@ export class DeviceService {
 
     // Find devices in those rooms
     const devices = await Device.find({ roomId: { $in: roomIds } });
-    return devices;
+    return devices.map(deviceDocToDto);
   }
 
   // Create
@@ -33,6 +34,15 @@ export class DeviceService {
     }
 
     const created = await Device.create(device);
-    return created as IDevice ;
+    return deviceDocToDto(created);
+  }
+
+  // Update
+
+  static async updateDevice(id: string, data: Partial<IDevice>): Promise<IDevice | null> {
+    await dbConnect();
+    const device = await Device.findByIdAndUpdate(id, data, { new: true });
+    if (!device) throw new NotFoundError('Device', id);
+    return deviceDocToDto(device);
   }
 }

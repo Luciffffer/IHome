@@ -13,20 +13,20 @@ export interface IDeviceBase {
   description: string 
 }
 
-interface LightState {
+export interface LightState {
   on: boolean;
   brightness: number; // 0-100
 }
 
-interface ThermostatState {
+export interface ThermostatState {
   temperature: number; // in Celsius between 10 and 30
 }
 
-interface DoorLockState {
+export interface DoorLockState {
   locked: boolean
 }
 
-interface AudioState {
+export interface AudioState {
   playlist: string;
   volume: number; // 0-20
 }
@@ -64,7 +64,7 @@ export interface IDeviceDocument extends Document {
 const deviceSchema = new mongoose.Schema<IDeviceDocument>({
   name: { type: String, required: true, maxLength: 32, trim: true },
   type: { type: String, required: true, enum: ['light', 'thermostat', 'door-lock', 'audio'] },
-  upcCode: { type: String, required: true, unique: true, trim: true, length: 13 },
+  upcCode: { type: String, required: true, trim: true, length: 13 },
   roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'Room', required: true },
   x: { type: Number, required: true },
   y: { type: Number, required: true },

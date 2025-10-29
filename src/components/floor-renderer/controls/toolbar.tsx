@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
-import { Plus, SidebarClose, SidebarOpen } from 'lucide-react';
+import { ListIndentDecrease, ListIndentIncrease, Plus } from 'lucide-react';
 import { useFloorUI } from '../../../contexts/floor-ui-context';
 
 interface ToolbarProps {
@@ -16,6 +16,7 @@ function Toolbar({ hidden = false }: ToolbarProps) {
     openAddDeviceMenu,
     openDeviceList,
     closeSideMenu,
+    sideMenuOpen,
     sideMenuMode,
   } = useFloorUI();
   const [shown, setShown] = useState(!hidden);
@@ -67,17 +68,17 @@ function Toolbar({ hidden = false }: ToolbarProps) {
             variant="ghost"
             className="cursor-pointer *:[svg]:!w-5 *:[svg]:!h-5"
             onClick={() => {
-              if (sideMenuMode === 'device-list') {
+              if (sideMenuOpen && sideMenuMode === 'device-list') {
                 closeSideMenu();
               } else {
                 openDeviceList();
               }
             }}
           >
-            {sideMenuMode === 'device-list' ? (
-              <SidebarOpen />
+            {sideMenuOpen && sideMenuMode === 'device-list' ? (
+              <ListIndentIncrease />
             ) : (
-              <SidebarClose />
+              <ListIndentDecrease />
             )}
           </Button>
         </li>

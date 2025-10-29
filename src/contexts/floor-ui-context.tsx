@@ -4,7 +4,7 @@ import { DeviceType, IDevice } from '@/models/Device';
 import { createContext, useContext, useState } from 'react';
 
 type ViewMode = '2d' | '3d';
-type SideMenuMode = 'closed' | 'device-list' | 'device-details' | 'device-form';
+type SideMenuMode = 'device-list' | 'device-details' | 'device-form';
 
 interface FloorUIState {
   // View settings
@@ -12,7 +12,8 @@ interface FloorUIState {
 
   // Side menu state
   sideMenuMode: SideMenuMode;
-  selectedDevice: IDevice | null;
+  sideMenuOpen: boolean;
+  selectedDeviceId: string | null;
   pendingDevice: Partial<IDevice> | null;
 
   // Device placement state
@@ -33,6 +34,7 @@ interface FloorUIContextValue extends FloorUIState {
   openDeviceDetail: (device: IDevice) => void;
   openDeviceForm: (pendingDevice: Partial<IDevice>) => void;
   closeSideMenu: () => void;
+  resetSideMenuState: () => void;
 
   // Device placement actions
   startPlacingDevice: (type: DeviceType) => void;
@@ -49,8 +51,9 @@ const floorUIContext = createContext<FloorUIContextValue | null>(null);
 export function FloorUIProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<FloorUIState>({
     viewMode: '3d',
-    sideMenuMode: 'closed',
-    selectedDevice: null,
+    sideMenuMode: 'device-list',
+    sideMenuOpen: false,
+    selectedDeviceId: null,
     pendingDevice: null,
     isPlacingDevice: false,
     placingDeviceType: null,
@@ -74,8 +77,9 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({
       ...prev,
       sideMenuMode: 'device-list',
-      selectedDevice: null,
+      selectedDeviceId: null,
       pendingDevice: null,
+      sideMenuOpen: true,
     }));
   };
 
@@ -83,8 +87,12 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({
       ...prev,
       sideMenuMode: 'device-details',
-      selectedDevice: device,
+      selectedDeviceId: device.id,
       pendingDevice: null,
+      isAddDeviceMenuOpen: false,
+      isPlacingDevice: false,
+      placingDeviceType: null,
+      sideMenuOpen: true,
     }));
   };
 
@@ -92,16 +100,23 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({
       ...prev,
       sideMenuMode: 'device-form',
-      selectedDevice: null,
+      selectedDeviceId: null,
       pendingDevice,
+      sideMenuOpen: true,
     }));
   };
 
   const closeSideMenu = () => {
     setState(prev => ({
       ...prev,
-      sideMenuMode: 'closed',
-      selectedDevice: null,
+      sideMenuOpen: false,
+    }));
+  };
+
+  const resetSideMenuState = () => {
+    setState(prev => ({
+      ...prev,
+      selectedDeviceId: null,
       pendingDevice: null,
     }));
   };
@@ -113,7 +128,7 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
       viewMode: '2d',
       isPlacingDevice: true,
       placingDeviceType: type,
-      sideMenuMode: 'closed',
+      sideMenuOpen: false,
     }));
   };
 
@@ -150,7 +165,7 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
       isPlacingDevice: false,
       placingDeviceType: null,
       pendingDevice: null,
-      sideMenuMode: 'closed',
+      sideMenuOpen: false,
       viewMode: '2d',
     }));
   };
@@ -161,7 +176,7 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
       isAddDeviceMenuOpen: false,
       isPlacingDevice: false,
       placingDeviceType: null,
-      sideMenuMode: 'closed',
+      sideMenuOpen: false,
       viewMode: '3d',
       pendingDevice: null,
     }));
@@ -177,6 +192,7 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
         openDeviceDetail,
         openDeviceForm,
         closeSideMenu,
+        resetSideMenuState,
         startPlacingDevice,
         cancelPlacingDevice,
         togglePlacingDevice,
