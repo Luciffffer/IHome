@@ -1,6 +1,6 @@
 'use client';
 
-import { useFloors } from '@/contexts/floors-context';
+import { useFloors } from '@/contexts/floors';
 import Room3D from './room-3d';
 import { WallSystem } from './wall-system';
 import Camera from './camera';

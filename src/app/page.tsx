@@ -3,7 +3,7 @@ import FloorRenderer from '@/components/floor-renderer/floor-renderer';
 import { FloorSwitcher } from '@/components/floor-switcher';
 import { Header } from '@/components/layout/header';
 import Logo from '@/components/ui/logo';
-import { FloorsProvider } from '@/contexts/floors-context';
+import { FloorsProvider } from '@/contexts/floors';
 
 function Home() {
   return (

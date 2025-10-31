@@ -1,6 +1,6 @@
 'use client';
 
-import { useFloors } from '@/contexts/floors-context';
+import { useFloors } from '@/contexts/floors';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { useState } from 'react';
 import { Button } from './ui/button';

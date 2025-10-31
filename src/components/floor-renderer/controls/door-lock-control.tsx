@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { useFloors } from '@/contexts/floors-context';
+import { useFloors } from '@/contexts/floors';
 import { DoorLockState, IDevice } from '@/models/Device';
 import { Lock, LockOpen } from 'lucide-react';
 

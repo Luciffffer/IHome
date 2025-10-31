@@ -3,7 +3,7 @@ import { IDevice, LightState } from '@/models/Device';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Lightbulb } from 'lucide-react';
-import { useFloors } from '@/contexts/floors-context';
+import { useFloors } from '@/contexts/floors';
 
 interface LightControlProps {
   device: IDevice;

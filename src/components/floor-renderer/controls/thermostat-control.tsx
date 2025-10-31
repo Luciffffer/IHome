@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { IDevice, ThermostatState } from '@/models/Device';
-import { useFloors } from '@/contexts/floors-context';
+import { useFloors } from '@/contexts/floors';
 import { Slider } from '@/components/ui/slider';
 
 interface ThermostatControlProps {

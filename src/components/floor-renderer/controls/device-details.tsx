@@ -1,11 +1,11 @@
 import { Separator } from '@/components/ui/separator';
 import { useFloorUI } from '@/contexts/floor-ui-context';
 import DoorLockControl from './door-lock-control';
-import { useFloors } from '@/contexts/floors-context';
 import ThermostatControl from './thermostat-control';
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash } from 'lucide-react';
 import LightControl from './light-control';
+import { useFloors } from '@/contexts/floors';
 
 function DeviceDetails() {
   const { selectedDeviceId } = useFloorUI();

@@ -9,7 +9,7 @@ import { useFloorUI } from '../../../contexts/floor-ui-context';
 import AddDeviceForm from './add-dervice-form';
 import DeviceDetails from './device-details';
 import { useEffect, useState } from 'react';
-import { useFloors } from '@/contexts/floors-context';
+import { useFloors } from '@/contexts/floors';
 
 function SideMenu() {
   const {
