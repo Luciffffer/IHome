@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Pencil, Trash } from 'lucide-react';
 import LightControl from './light-control';
 import { useFloors } from '@/contexts/floors';
+import AudioControl from './audio-control';
 
 function DeviceDetails() {
   const { selectedDeviceId } = useFloorUI();
@@ -33,6 +34,10 @@ function DeviceDetails() {
 
       {selectedDevice!.type === 'light' && (
         <LightControl device={selectedDevice!} />
+      )}
+
+      {selectedDevice!.type === 'audio' && (
+        <AudioControl device={selectedDevice!} />
       )}
 
       <Separator

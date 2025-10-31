@@ -46,7 +46,7 @@ export function getDefaultDeviceState(type: DeviceType) : IDevice['state'] {
     case 'door-lock':
       return { locked: false };
     case 'audio':
-      return { playlist: 'classic', volume: 0 };
+      return { playlist: '4', volume: 0 };
   }
 }
 
