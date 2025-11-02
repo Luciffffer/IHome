@@ -45,4 +45,12 @@ export class DeviceService {
     if (!device) throw new NotFoundError('Device', id);
     return deviceDocToDto(device);
   }
+
+  // Delete
+
+  static async deleteDevice(id: string): Promise<void> {
+    await dbConnect();
+    const result = await Device.findByIdAndDelete(id);
+    if (!result) throw new NotFoundError('Device', id);
+  }
 }

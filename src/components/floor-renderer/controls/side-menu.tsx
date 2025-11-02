@@ -10,6 +10,7 @@ import AddDeviceForm from './add-dervice-form';
 import DeviceDetails from './device-details';
 import { useEffect, useState } from 'react';
 import { useFloors } from '@/contexts/floors';
+import EditDeviceForm from './edit-device-form';
 
 function SideMenu() {
   const {
@@ -56,6 +57,13 @@ function SideMenu() {
                     selectedDevice.name.slice(1)
                   : 'Device'
               } Details`}
+            {sideMenuMode === 'device-edit' &&
+              `Edit ${
+                selectedDevice != null
+                  ? selectedDevice.name.charAt(0).toUpperCase() +
+                    selectedDevice.name.slice(1)
+                  : 'Device'
+              }`}
           </h2>
         </SidePopupMenuHeader>
         {sideMenuMode === 'device-list' && (
@@ -70,6 +78,7 @@ function SideMenu() {
         )}
         {sideMenuMode === 'device-form' && <AddDeviceForm />}
         {sideMenuMode === 'device-details' && <DeviceDetails />}
+        {sideMenuMode === 'device-edit' && <EditDeviceForm />}
       </SidePopupMenuContent>
     </SidePopupMenu>
   );

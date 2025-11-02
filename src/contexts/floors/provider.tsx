@@ -21,6 +21,7 @@ import {
   createFloorApi,
   createDeviceApi,
   updateDeviceApi,
+  deleteDeviceApi,
 } from './api';
 import { useDeviceUpdateQueue } from './update-queue';
 
@@ -38,6 +39,8 @@ interface FloorsContextValue {
   devicesQueryStatus: QueryStatus;
   isCreatingFloor: boolean;
   isCreatingDevice: boolean;
+  isUpdatingDevice: boolean;
+  isDeletingDevice: boolean;
 
   // actions
   setCurrentFloorIndex: (index: number) => void;
@@ -48,6 +51,7 @@ interface FloorsContextValue {
     deviceId: string,
     updates: Partial<IDevice>
   ) => Promise<IDevice>;
+  deleteDevice(deviceId: string): Promise<void>;
 
   // Debounced writes
   queueDeviceUpdate: (deviceId: string, updates: Partial<IDevice>) => void;
@@ -193,6 +197,20 @@ export function FloorsProvider({ children }: { children: ReactNode }) {
       toast.error('Failed to create device. Please try again later.'),
   });
 
+  // Delete device
+  const deleteDeviceMutation = useMutation({
+    mutationFn: deleteDeviceApi,
+    onError: () => {
+      toast.error('Failed to delete device. Please try again later.');
+    },
+    onSuccess: (_data, deviceId) => {
+      toast.success('Device deleted successfully');
+      queryClient.setQueryData<IDevice[]>(devicesKey(currentFloor?.id), old =>
+        (old || []).filter(device => device.id !== deviceId)
+      );
+    },
+  });
+
   const value: FloorsContextValue = {
     floors,
     currentFloorIndex,
@@ -202,6 +220,8 @@ export function FloorsProvider({ children }: { children: ReactNode }) {
     devicesQueryStatus,
     isCreatingFloor: createFloorMutation.isPending,
     isCreatingDevice: createDeviceMutation.isPending,
+    isUpdatingDevice: updateDeviceMutation.isPending,
+    isDeletingDevice: deleteDeviceMutation.isPending,
     setCurrentFloorIndex: handleSetCurrentFloorIndex,
     refreshFloors: async () => {
       await refreshFloors();
@@ -212,6 +232,9 @@ export function FloorsProvider({ children }: { children: ReactNode }) {
     },
     createDevice: async (device: Partial<IDevice>) => {
       return await createDeviceMutation.mutateAsync(device);
+    },
+    deleteDevice: async (deviceId: string) => {
+      await deleteDeviceMutation.mutateAsync(deviceId);
     },
     updateDevice,
     queueDeviceUpdate,

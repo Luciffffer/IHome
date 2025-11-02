@@ -1,16 +1,6 @@
 'use client';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import DeleteDialog from '@/components/delete-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Field,
@@ -150,38 +140,16 @@ function SettingsPanel() {
             Deleting a floor can&apos;t be undone. This action will permanently
             remove the floor and all its contents.
           </p>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" className="cursor-pointer">
-                {isDeletingFloor ? <Spinner /> : <Trash />}
-                Delete Floor
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the
-                  floor and all its contents from our servers.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="cursor-pointer">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  variant="destructive"
-                  className="cursor-pointer"
-                  onClick={() => {
-                    deleteFloor();
-                  }}
-                >
-                  <Trash />
-                  Yes, Delete Floor
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <DeleteDialog
+            onDelete={() => deleteFloor()}
+            description="This action cannot be undone. This will permanently delete the
+                  floor and all its contents from our servers."
+          >
+            <Button variant="outline" className="cursor-pointer">
+              {isDeletingFloor ? <Spinner /> : <Trash />}
+              Delete Floor
+            </Button>
+          </DeleteDialog>
         </div>
       </SidePopupMenuContent>
     </SidePopupMenu>

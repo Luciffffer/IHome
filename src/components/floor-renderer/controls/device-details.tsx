@@ -7,12 +7,25 @@ import { Pencil, Trash } from 'lucide-react';
 import LightControl from './light-control';
 import { useFloors } from '@/contexts/floors';
 import AudioControl from './audio-control';
+import { Spinner } from '@/components/ui/spinner';
+import DeleteDialog from '@/components/delete-dialog';
 
 function DeviceDetails() {
-  const { selectedDeviceId } = useFloorUI();
-  const { devices } = useFloors();
+  const { selectedDeviceId, closeSideMenu, openDeviceEdit } = useFloorUI();
+  const { devices, isDeletingDevice, deleteDevice } = useFloors();
 
   const selectedDevice = devices?.find(d => d.id === selectedDeviceId);
+
+  if (!selectedDevice) {
+    return (
+      <div
+        aria-label="loading"
+        className="flex justify-center items-center py-12"
+      >
+        <Spinner className="w-9 h-9" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -46,14 +59,26 @@ function DeviceDetails() {
       />
       <h3 className="font-heading-2xs text-sm mb-3">Manage device</h3>
       <div className="flex gap-3 justify-center">
-        <Button variant="outline" className="cursor-pointer">
+        <Button
+          variant="outline"
+          className="cursor-pointer"
+          onClick={() => openDeviceEdit(selectedDevice!)}
+        >
           <Pencil />
           Edit
         </Button>
-        <Button variant="outline" className="cursor-pointer">
-          <Trash />
-          Remove
-        </Button>
+        <DeleteDialog
+          onDelete={async () => {
+            await deleteDevice(selectedDevice!.id);
+            closeSideMenu();
+          }}
+          description="This action cannot be undone. This will permanently delete the device from our servers."
+        >
+          <Button variant="outline" className="cursor-pointer">
+            {isDeletingDevice ? <Spinner /> : <Trash />}
+            Delete
+          </Button>
+        </DeleteDialog>
       </div>
     </>
   );

@@ -49,3 +49,10 @@ export async function updateDeviceApi(deviceId: string, updates: Partial<IDevice
   const json = await res.json();
   return json.data as IDevice;
 }
+
+export async function deleteDeviceApi(deviceId: string): Promise<void> {
+  const res = await fetch(`/api/devices/${deviceId}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error(`Failed to delete device: ${res.statusText}`);
+}

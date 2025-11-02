@@ -1,10 +1,18 @@
 import {
+  AudioState,
   DoorLockState,
   IDevice,
   LightState,
   ThermostatState,
 } from '@/models/Device';
-import { Lightbulb, Thermometer, Lock, Volume2, LockOpen } from 'lucide-react';
+import {
+  Lightbulb,
+  Thermometer,
+  Lock,
+  Volume2,
+  LockOpen,
+  VolumeX,
+} from 'lucide-react';
 import { useMemo } from 'react';
 import { Html } from '@react-three/drei';
 import { useFloorUI } from '@/contexts/floor-ui-context';
@@ -32,6 +40,10 @@ function Device3D({ device }: Device3DProps) {
         return LockOpen;
       }
       case 'audio':
+        const state = device.state as AudioState;
+        if (state.volume === 0) {
+          return VolumeX;
+        }
         return Volume2;
     }
   }, [device.type, device.state]);
@@ -63,6 +75,10 @@ function Device3D({ device }: Device3DProps) {
         return '#10b981';
       }
       case 'audio':
+        const state = device.state as AudioState;
+        if (state.volume === 0) {
+          return '#6b7280';
+        }
         return '#8b5cf6';
     }
   }, [device.type, device.state]);
@@ -77,6 +93,7 @@ function Device3D({ device }: Device3DProps) {
         transform: 'translate(-50%, -50%)',
       }}
       distanceFactor={10}
+      zIndexRange={[100, 200]}
     >
       <div
         className="relative cursor-pointer"

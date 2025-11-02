@@ -4,7 +4,11 @@ import { DeviceType, IDevice } from '@/models/Device';
 import { createContext, useContext, useState } from 'react';
 
 type ViewMode = '2d' | '3d';
-type SideMenuMode = 'device-list' | 'device-details' | 'device-form';
+type SideMenuMode =
+  | 'device-list'
+  | 'device-details'
+  | 'device-form'
+  | 'device-edit';
 
 interface FloorUIState {
   // View settings
@@ -40,6 +44,9 @@ interface FloorUIContextValue extends FloorUIState {
   startPlacingDevice: (type: DeviceType) => void;
   cancelPlacingDevice: () => void;
   togglePlacingDevice: (type: DeviceType) => void;
+
+  // Device editing actions
+  openDeviceEdit: (device: IDevice) => void;
 
   // Add device menu actions
   openAddDeviceMenu: () => void;
@@ -157,6 +164,16 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  // Device editing actions
+  const openDeviceEdit = (device: IDevice) => {
+    setState(prev => ({
+      ...prev,
+      sideMenuMode: 'device-edit',
+      selectedDeviceId: device.id,
+      sideMenuOpen: true,
+    }));
+  };
+
   // Add device menu actions
   const openAddDeviceMenu = () => {
     setState(prev => ({
@@ -196,6 +213,7 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
         startPlacingDevice,
         cancelPlacingDevice,
         togglePlacingDevice,
+        openDeviceEdit,
         openAddDeviceMenu,
         closeAddDeviceMenu,
       }}
