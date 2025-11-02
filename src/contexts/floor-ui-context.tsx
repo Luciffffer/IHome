@@ -8,7 +8,8 @@ type SideMenuMode =
   | 'device-list'
   | 'device-details'
   | 'device-form'
-  | 'device-edit';
+  | 'device-edit'
+  | 'scenes';
 
 interface FloorUIState {
   // View settings
@@ -47,6 +48,9 @@ interface FloorUIContextValue extends FloorUIState {
 
   // Device editing actions
   openDeviceEdit: (device: IDevice) => void;
+
+  // Open scenes
+  openScenes: () => void;
 
   // Add device menu actions
   openAddDeviceMenu: () => void;
@@ -174,6 +178,17 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  // Open scenes
+  const openScenes = () => {
+    setState(prev => ({
+      ...prev,
+      sideMenuMode: 'scenes',
+      selectedDeviceId: null,
+      pendingDevice: null,
+      sideMenuOpen: true,
+    }));
+  };
+
   // Add device menu actions
   const openAddDeviceMenu = () => {
     setState(prev => ({
@@ -214,6 +229,7 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
         cancelPlacingDevice,
         togglePlacingDevice,
         openDeviceEdit,
+        openScenes,
         openAddDeviceMenu,
         closeAddDeviceMenu,
       }}

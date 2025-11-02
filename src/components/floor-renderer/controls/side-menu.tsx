@@ -11,6 +11,8 @@ import DeviceDetails from './device-details';
 import { useEffect, useState } from 'react';
 import { useFloors } from '@/contexts/floors';
 import EditDeviceForm from './edit-device-form';
+import DeviceList from './device-list';
+import ScenesList from './scenes-list';
 
 function SideMenu() {
   const {
@@ -64,21 +66,14 @@ function SideMenu() {
                     selectedDevice.name.slice(1)
                   : 'Device'
               }`}
+            {sideMenuMode === 'scenes' && 'Scenes'}
           </h2>
         </SidePopupMenuHeader>
-        {sideMenuMode === 'device-list' && (
-          <>
-            <ul>
-              <li>Item 1</li>
-              <li>Item 2</li>
-              <li>Item 3</li>
-              <li>Item 4</li>
-            </ul>
-          </>
-        )}
+        {sideMenuMode === 'device-list' && <DeviceList />}
         {sideMenuMode === 'device-form' && <AddDeviceForm />}
         {sideMenuMode === 'device-details' && <DeviceDetails />}
         {sideMenuMode === 'device-edit' && <EditDeviceForm />}
+        {sideMenuMode === 'scenes' && <ScenesList />}
       </SidePopupMenuContent>
     </SidePopupMenu>
   );

@@ -1,21 +1,7 @@
-import {
-  AudioState,
-  DoorLockState,
-  IDevice,
-  LightState,
-  ThermostatState,
-} from '@/models/Device';
-import {
-  Lightbulb,
-  Thermometer,
-  Lock,
-  Volume2,
-  LockOpen,
-  VolumeX,
-} from 'lucide-react';
-import { useMemo } from 'react';
+import { IDevice } from '@/models/Device';
 import { Html } from '@react-three/drei';
 import { useFloorUI } from '@/contexts/floor-ui-context';
+import DeviceIcon from '../device-icon';
 
 interface Device3DProps {
   device: IDevice;
@@ -25,63 +11,6 @@ const DEVICE_HEIGHT = 0.05;
 
 function Device3D({ device }: Device3DProps) {
   const { openDeviceDetail } = useFloorUI();
-
-  const Icon = useMemo(() => {
-    switch (device.type) {
-      case 'light':
-        return Lightbulb;
-      case 'thermostat':
-        return Thermometer;
-      case 'door-lock': {
-        const state = device.state as DoorLockState;
-        if (state.locked) {
-          return Lock;
-        }
-        return LockOpen;
-      }
-      case 'audio':
-        const state = device.state as AudioState;
-        if (state.volume === 0) {
-          return VolumeX;
-        }
-        return Volume2;
-    }
-  }, [device.type, device.state]);
-
-  const color = useMemo(() => {
-    switch (device.type) {
-      case 'light': {
-        const state = device.state as LightState;
-        if (state.on) {
-          return '#fbbf24';
-        }
-        return '#6b7280';
-      }
-      case 'thermostat': {
-        const state = device.state as ThermostatState;
-        if (state.temperature < 18) {
-          return '#3b82f6';
-        } else if (state.temperature <= 24) {
-          return '#10b981';
-        } else {
-          return '#ef4444';
-        }
-      }
-      case 'door-lock': {
-        const state = device.state as DoorLockState;
-        if (state.locked) {
-          return '#3b82f6';
-        }
-        return '#10b981';
-      }
-      case 'audio':
-        const state = device.state as AudioState;
-        if (state.volume === 0) {
-          return '#6b7280';
-        }
-        return '#8b5cf6';
-    }
-  }, [device.type, device.state]);
 
   return (
     <Html
@@ -107,7 +36,7 @@ function Device3D({ device }: Device3DProps) {
           className={`flex items-center justify-center w-12 h-12 rounded-full 
             shadow-lg bg-white`}
         >
-          <Icon className="w-7 h-7" style={{ color }} />
+          <DeviceIcon device={device} className="w-7 h-7" />
         </div>
       </div>
     </Html>

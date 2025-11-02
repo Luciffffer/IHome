@@ -87,7 +87,7 @@ export function FloorsProvider({ children }: { children: ReactNode }) {
     queryKey: floorsKey,
     queryFn: fetchFloors,
     refetchInterval: 5000,
-    refetchIntervalInBackground: true,
+    refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,
     staleTime: 0,
   });

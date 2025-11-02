@@ -2,7 +2,13 @@
 
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
-import { ListIndentDecrease, ListIndentIncrease, Plus } from 'lucide-react';
+import {
+  FolderClock,
+  FolderOpen,
+  List,
+  ListIndentIncrease,
+  Plus,
+} from 'lucide-react';
 import { useFloorUI } from '../../../contexts/floor-ui-context';
 
 interface ToolbarProps {
@@ -16,6 +22,7 @@ function Toolbar({ hidden = false }: ToolbarProps) {
     openAddDeviceMenu,
     openDeviceList,
     closeSideMenu,
+    openScenes,
     sideMenuOpen,
     sideMenuMode,
   } = useFloorUI();
@@ -78,7 +85,28 @@ function Toolbar({ hidden = false }: ToolbarProps) {
             {sideMenuOpen && sideMenuMode === 'device-list' ? (
               <ListIndentIncrease />
             ) : (
-              <ListIndentDecrease />
+              <List />
+            )}
+          </Button>
+        </li>
+        <li>
+          <Button
+            size="icon-lg"
+            variant="ghost"
+            aria-label="See global scenes"
+            className="cursor-pointer *:[svg]:!w-5 *:[svg]:!h-5"
+            onClick={() => {
+              if (sideMenuOpen && sideMenuMode === 'scenes') {
+                closeSideMenu();
+              } else {
+                openScenes();
+              }
+            }}
+          >
+            {sideMenuOpen && sideMenuMode === 'scenes' ? (
+              <FolderOpen />
+            ) : (
+              <FolderClock />
             )}
           </Button>
         </li>
