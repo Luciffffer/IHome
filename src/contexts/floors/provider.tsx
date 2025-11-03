@@ -47,6 +47,7 @@ interface FloorsContextValue {
   refreshFloors: () => Promise<void>;
   createFloor: () => Promise<void>;
   createDevice: (device: Partial<IDevice>) => Promise<IDevice>;
+  invalidateDevices: () => Promise<void>;
   updateDevice: (
     deviceId: string,
     updates: Partial<IDevice>
@@ -237,6 +238,11 @@ export function FloorsProvider({ children }: { children: ReactNode }) {
       await deleteDeviceMutation.mutateAsync(deviceId);
     },
     updateDevice,
+    invalidateDevices: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: devicesKey(currentFloor?.id),
+      });
+    },
     queueDeviceUpdate,
     flushDeviceUpdates,
   };

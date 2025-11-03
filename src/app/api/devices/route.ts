@@ -1,6 +1,6 @@
 import { requireAdmin, requireAuth } from "@/lib/auth-helpers";
 import { handleError } from "@/lib/error-handler";
-import { ValidationError } from "@/lib/errors";
+import { IDevice } from "@/models/Device";
 import { DeviceService } from "@/services/DeviceService";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -11,9 +11,13 @@ export async function GET(request: NextRequest) {
     const searchParams = await request.nextUrl.searchParams;
     const floorId = searchParams.get('floorId');
 
-    if (!floorId) throw new ValidationError('floorId is required');
+    let devices: IDevice[] = [];
 
-    const devices = await DeviceService.getDevicesByFloorId(floorId);
+    if (!floorId) {
+      devices = await DeviceService.getDevices();
+    } else {
+      devices = await DeviceService.getDevicesByFloorId(floorId);
+    }
 
     return NextResponse.json(
       { 

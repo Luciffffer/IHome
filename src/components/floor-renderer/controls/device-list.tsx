@@ -11,6 +11,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { Separator } from '@/components/ui/separator';
 
 function DeviceList() {
   const { devices } = useFloors();
@@ -65,6 +66,11 @@ function DeviceList() {
           {filtered.length} / {devices?.length ?? 0}
         </div>
       </div>
+
+      <Separator
+        orientation="horizontal"
+        className="mt-3 bg-border -mx-4 !w-auto"
+      />
 
       {/* Devices */}
       {devices?.length === 0 ? (

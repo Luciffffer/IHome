@@ -70,6 +70,7 @@ export function useDeviceUpdateQueue(
 
           if (!hasOtherPending) {
             hasPendingref.current = false;
+            optimisticOverlayRef.current.clear();
             queryClient.invalidateQueries({ queryKey: devicesKey(floorId) });
           }
         });

@@ -9,7 +9,8 @@ type SideMenuMode =
   | 'device-details'
   | 'device-form'
   | 'device-edit'
-  | 'scenes';
+  | 'scenes'
+  | 'add-global-scene';
 
 interface FloorUIState {
   // View settings
@@ -51,6 +52,9 @@ interface FloorUIContextValue extends FloorUIState {
 
   // Open scenes
   openScenes: () => void;
+
+  // Open add global scene
+  openAddGlobalScene: () => void;
 
   // Add device menu actions
   openAddDeviceMenu: () => void;
@@ -189,6 +193,17 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  // Open add global scene
+  const openAddGlobalScene = () => {
+    setState(prev => ({
+      ...prev,
+      sideMenuMode: 'add-global-scene',
+      selectedDeviceId: null,
+      pendingDevice: null,
+      sideMenuOpen: true,
+    }));
+  };
+
   // Add device menu actions
   const openAddDeviceMenu = () => {
     setState(prev => ({
@@ -230,6 +245,7 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
         togglePlacingDevice,
         openDeviceEdit,
         openScenes,
+        openAddGlobalScene,
         openAddDeviceMenu,
         closeAddDeviceMenu,
       }}

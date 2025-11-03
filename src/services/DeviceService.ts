@@ -23,6 +23,12 @@ export class DeviceService {
     return devices.map(deviceDocToDto);
   }
 
+  static async getDevices(): Promise<IDevice[]> {
+    await dbConnect();
+    const devices = await Device.find();
+    return devices.map(deviceDocToDto);
+  }
+
   // Create
 
   static async createDevice(data: Partial<IDevice>): Promise<IDevice> {

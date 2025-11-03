@@ -105,7 +105,15 @@ function AddDeviceForm() {
           name="description"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid} className="mb-3">
-              <FieldLabel>Device Description</FieldLabel>
+              <FieldLabel
+                htmlFor="device-description"
+                className="flex justify-between items-center"
+              >
+                <span>Device Description</span>
+                <span className="text-muted-foreground font-body-xs">
+                  (optional)
+                </span>
+              </FieldLabel>
               <Textarea
                 {...field}
                 id="device-description"

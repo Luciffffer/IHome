@@ -13,17 +13,11 @@ function summarizeState(device: IDevice): string {
       case 'thermostat': {
         const s = device.state as ThermostatState;
         const t = s.temperature;
-        return t != null ? `Set to ${t}°C` : 'No target set';
+        return `Set to ${t}°C`;
       }
       case 'light': {
         const s = device.state as LightState;
-        if (typeof s.on === 'boolean') {
-          if (s.brightness != null)
-            return `${s.on ? 'On' : 'Off'} • ${s.brightness}%`;
-          return s.on ? 'On' : 'Off';
-        }
-        if (s.brightness != null) return `Brightness ${s.brightness}%`;
-        return 'No state';
+        return `${s.on ? 'On' : 'Off'} • ${s.brightness}%`;
       }
       case 'audio': {
         const s = device.state as AudioState;
@@ -33,9 +27,7 @@ function summarizeState(device: IDevice): string {
       }
       case 'door-lock': {
         const s = device.state as DoorLockState;
-        if (typeof s.locked === 'boolean')
-          return s.locked ? 'Locked' : 'Unlocked';
-        return 'No state';
+        return s.locked ? 'Locked' : 'Unlocked';
       }
     }
   } catch {
