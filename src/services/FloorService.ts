@@ -69,6 +69,6 @@ export class FloorService {
         // Check for devices and remove them
         await DeviceService.removeDevicesByRoomIds(floor.rooms.map((room: IRoom) => room.id));
 
-        await floor.remove();
+        await Floor.findByIdAndDelete(id);
     }
 }

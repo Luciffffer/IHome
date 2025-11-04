@@ -1,7 +1,7 @@
 import { Controller, UseFormReturn } from 'react-hook-form';
-import { Field, FieldError, FieldLabel } from '../ui/field';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface SceneDetailsFieldsProps {
   form: UseFormReturn<{

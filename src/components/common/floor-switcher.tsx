@@ -1,11 +1,11 @@
 'use client';
 
 import { useFloors } from '@/contexts/floors';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { useState } from 'react';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { ChevronsUpDown, Pencil, Plus } from 'lucide-react';
-import { Skeleton } from './ui/skeleton';
+import { Skeleton } from '../ui/skeleton';
 import {
   Command,
   CommandEmpty,
@@ -13,8 +13,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from './ui/command';
-import { Spinner } from './ui/spinner';
+} from '../ui/command';
+import { Spinner } from '../ui/spinner';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import {
@@ -27,7 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from './ui/alert-dialog';
+} from '../ui/alert-dialog';
 
 export function FloorSwitcher({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);

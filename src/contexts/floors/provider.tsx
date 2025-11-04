@@ -1,18 +1,9 @@
 'use client';
-import { queryClient } from '@/components/react-query-provider';
+import { queryClient } from '@/components/providers/react-query-provider';
 import { IDevice } from '@/models/Device';
-import { IFloor } from '@/models/Floor';
-import { QueryStatus, useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { floorsKey, allDevicesKey } from './keys';
 import {
@@ -24,43 +15,7 @@ import {
   deleteDeviceApi,
 } from './api';
 import { useDeviceUpdateQueue } from './update-queue';
-
-interface FloorsContextValue {
-  // floor data
-  floors: IFloor[];
-  currentFloorIndex: number;
-  currentFloor: IFloor | null;
-
-  // Device data
-  allDevices: IDevice[];
-  devices: IDevice[];
-
-  // loading states
-  floorsQueryStatus: QueryStatus;
-  devicesQueryStatus: QueryStatus;
-  isCreatingFloor: boolean;
-  isCreatingDevice: boolean;
-  isUpdatingDevice: boolean;
-  isDeletingDevice: boolean;
-
-  // actions
-  setCurrentFloorIndex: (index: number) => void;
-  refreshFloors: () => Promise<void>;
-  createFloor: () => Promise<void>;
-  createDevice: (device: Partial<IDevice>) => Promise<IDevice>;
-  invalidateDevices: () => Promise<void>;
-  updateDevice: (
-    deviceId: string,
-    updates: Partial<IDevice>
-  ) => Promise<IDevice>;
-  deleteDevice(deviceId: string): Promise<void>;
-
-  // Debounced writes
-  queueDeviceUpdate: (deviceId: string, updates: Partial<IDevice>) => void;
-  flushDeviceUpdates: (deviceId: string) => Promise<void>;
-}
-
-const FloorsContext = createContext<FloorsContextValue | undefined>(undefined);
+import { FloorsContext, FloorsContextValue } from './context';
 
 export function FloorsProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -253,10 +208,4 @@ export function FloorsProvider({ children }: { children: ReactNode }) {
   return (
     <FloorsContext.Provider value={value}>{children}</FloorsContext.Provider>
   );
-}
-
-export function useFloors() {
-  const ctx = useContext(FloorsContext);
-  if (!ctx) throw new Error('useFloors must be used within a FloorsProvider');
-  return ctx;
 }

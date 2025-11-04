@@ -3,7 +3,7 @@ import { handleError } from "@/lib/error-handler";
 import { DeviceService } from "@/services/DeviceService";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     requireAuth();
     
@@ -25,7 +25,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     requireAdmin();
 

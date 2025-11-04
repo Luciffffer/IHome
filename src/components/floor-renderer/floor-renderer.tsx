@@ -17,15 +17,18 @@ import Logo from '../ui/logo';
 import Floor3DRenderer from './3d/floor-3d-renderer';
 import Toolbar from './controls/toolbar';
 import Link from 'next/link';
-import AddDeviceList from './controls/add-device-list';
+import AddDeviceList from '../devices/controls/add-device-list';
 import { Toaster } from '../ui/sonner';
 import { useFloorUI } from '../../contexts/floor-ui-context';
 import SideMenu from './controls/side-menu';
+import { useSession } from 'next-auth/react';
 
 const FloorRenderer = memo(function FloorRenderer() {
   const { currentFloor, floorsQueryStatus, createFloor, isCreatingFloor } =
     useFloors();
   const { isAddDeviceMenuOpen } = useFloorUI();
+  const session = useSession();
+  const role = session.data?.user?.role || 'user';
 
   const isLoading = floorsQueryStatus === 'pending';
   const isEmpty = floorsQueryStatus === 'success' && !currentFloor;
@@ -65,14 +68,18 @@ const FloorRenderer = memo(function FloorRenderer() {
               </EmptyMedia>
               <EmptyTitle>No Floors Defined Yet!</EmptyTitle>
               <EmptyDescription>
-                Get started by adding a new floor to your smart home system.
+                {role === 'admin'
+                  ? 'Get started by adding a new floor to manage your smart home system.'
+                  : 'Please contact an administrator to set up floors for your smart home system.'}
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button className="cursor-pointer" onClick={createFloor}>
-                {isCreatingFloor ? <Spinner /> : <Plus />}
-                Add floor
-              </Button>
+              {role === 'admin' && (
+                <Button className="cursor-pointer" onClick={createFloor}>
+                  {isCreatingFloor ? <Spinner /> : <Plus />}
+                  Add floor
+                </Button>
+              )}
             </EmptyContent>
           </Empty>
         </div>
@@ -87,15 +94,19 @@ const FloorRenderer = memo(function FloorRenderer() {
               </EmptyMedia>
               <EmptyTitle>No Rooms on This Floor Yet!</EmptyTitle>
               <EmptyDescription>
-                Add some rooms to get started.
+                {role === 'admin'
+                  ? 'Get started by adding some rooms to this floor.'
+                  : 'Please contact an administrator to set up rooms for this floor.'}
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button className="cursor-pointer" asChild>
-                <Link href={`/floor-planner/${currentFloor.id}`}>
-                  Edit floor
-                </Link>
-              </Button>
+              {role === 'admin' && (
+                <Button className="cursor-pointer" asChild>
+                  <Link href={`/floor-planner/${currentFloor.id}`}>
+                    Edit floor
+                  </Link>
+                </Button>
+              )}
             </EmptyContent>
           </Empty>
         </div>

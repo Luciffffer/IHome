@@ -7,7 +7,7 @@ import { Separator } from '@radix-ui/react-separator';
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import SceneCard from './scene-card';
+import SceneCard from '../../scenes/cards/scene-card';
 
 function MyScenesList() {
   const { openAddPersonalScene } = useFloorUI();

@@ -6,15 +6,15 @@ import {
   SidePopupMenuHeader,
 } from '@/components/ui/side-popup-menu';
 import { useFloorUI } from '../../../contexts/floor-ui-context';
-import AddDeviceForm from './add-dervice-form';
-import DeviceDetails from './device-details';
+import AddDeviceForm from '../../devices/forms/add-dervice-form';
+import DeviceDetails from '../../devices/device-details';
 import { useEffect, useState } from 'react';
 import { useFloors } from '@/contexts/floors';
-import EditDeviceForm from './edit-device-form';
-import DeviceList from './device-list';
-import ScenesList from './scenes-list';
-import AddGlobalSceneForm from './add-global-scene-form';
-import AddPersonalSceneForm from './add-personal-scene-form';
+import EditDeviceForm from '../../devices/forms/edit-device-form';
+import DeviceList from '../../devices/lists/device-list';
+import ScenesList from '../../scenes/lists/scenes-list';
+import AddGlobalSceneForm from '@/components/scenes/forms/add-global-scene-form';
+import AddPersonalSceneForm from '@/components/scenes/forms/add-personal-scene-form';
 
 function SideMenu() {
   const {

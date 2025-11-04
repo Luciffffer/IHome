@@ -1,32 +1,26 @@
 import { Controller, UseFormReturn } from 'react-hook-form';
-import { Field, FieldError, FieldLabel } from '../ui/field';
-import { Input } from '../ui/input';
 import { Check } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { sceneKeys } from '@/contexts/scenes/keys';
 import { fetchGlobalScenes } from '@/contexts/scenes/api';
-import { findScheduleConflicts } from './utils/schedule-conflicts';
 import { useEffect, useMemo } from 'react';
+import { TimeSlot } from '@/models/Scene';
+import { DAY_NAMES } from '@/types/schedule.types';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { findScheduleConflicts } from '@/lib/utils/schedule';
 
 interface SchedulePickerProps {
   form: UseFormReturn<{
-    schedule: {
-      day: number;
-      start: string;
-      end: string;
-    }[];
+    schedule: TimeSlot[];
   }>;
 }
 
-const DAYS: { index: number; label: string; long: string }[] = [
-  { index: 0, label: 'Sun', long: 'Sunday' },
-  { index: 1, label: 'Mon', long: 'Monday' },
-  { index: 2, label: 'Tue', long: 'Tuesday' },
-  { index: 3, label: 'Wed', long: 'Wednesday' },
-  { index: 4, label: 'Thu', long: 'Thursday' },
-  { index: 5, label: 'Fri', long: 'Friday' },
-  { index: 6, label: 'Sat', long: 'Saturday' },
-];
+const DAYS = DAY_NAMES.LONG.map((long, index) => ({
+  index,
+  label: DAY_NAMES.SHORT[index],
+  long,
+}));
 
 function SchedulePicker({ form }: SchedulePickerProps) {
   const { data: globalScenes = [] } = useQuery({

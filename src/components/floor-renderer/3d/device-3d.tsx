@@ -1,7 +1,7 @@
 import { IDevice } from '@/models/Device';
 import { Html } from '@react-three/drei';
 import { useFloorUI } from '@/contexts/floor-ui-context';
-import DeviceIcon from '../device-icon';
+import DeviceIcon from '../../devices/device-icon';
 
 interface Device3DProps {
   device: IDevice;

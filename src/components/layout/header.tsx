@@ -1,5 +1,5 @@
-import { NavUser } from '../nav-user';
-import { ThemeSwitcher } from '../theme-switcher';
+import { NavUser } from '../common/nav-user';
+import { ThemeSwitcher } from '../common/theme-switcher';
 interface HeaderProps {
   children?: React.ReactNode;
 }

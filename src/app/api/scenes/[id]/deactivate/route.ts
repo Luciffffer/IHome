@@ -4,7 +4,7 @@ import { IUser } from "@/models/User";
 import { SceneService } from "@/services/SceneService";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user: IUser | null = (await requireAuth(request))?.user as IUser || null;
 

@@ -9,7 +9,7 @@ import { sceneKeys } from '@/contexts/scenes/keys';
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import SceneCard from './scene-card';
+import SceneCard from '../../scenes/cards/scene-card';
 
 function GlobalScenesList() {
   const { openAddGlobalScene } = useFloorUI();

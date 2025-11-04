@@ -1,5 +1,4 @@
 import { GlobalScenePostBody } from "@/app/api/scenes/global/route";
-import { findScheduleConflicts, toMinutes } from "@/components/floor-renderer/utils/schedule-conflicts";
 import dbConnect from "@/lib/db";
 import { ForbiddenError, NotFoundError, UnauthorizedError, ValidationError } from "@/lib/errors";
 import Scene, { IScene, ISceneAction, sceneDocToDto } from "@/models/Scene";
@@ -7,6 +6,8 @@ import { DeviceService } from "./DeviceService";
 import { PersonalScenePostBody } from "@/app/api/scenes/mine/route";
 import { IUser } from "@/models/User";
 import { getDefaultDeviceState, IDevice } from "@/models/Device";
+import { toMinutes } from "@/lib/utils/time";
+import { findScheduleConflicts } from "@/lib/utils/schedule";
 
 export class SceneService {
   // Get

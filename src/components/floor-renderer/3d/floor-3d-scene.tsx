@@ -9,7 +9,7 @@ import { ThreeEvent } from '@react-three/fiber';
 import {
   findContainingRoom,
   validateDevicePlacement,
-} from '../utils/device-placement';
+} from '../../../lib/utils/device-placement';
 import Device3D from './device-3d';
 import { useRef, useState } from 'react';
 import * as THREE from 'three';

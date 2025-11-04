@@ -1,5 +1,5 @@
-import DeleteDialog from '@/components/delete-dialog';
-import { queryClient } from '@/components/react-query-provider';
+import DeleteDialog from '@/components/common/delete-dialog';
+import { queryClient } from '@/components/providers/react-query-provider';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { allDevicesKey, useFloors } from '@/contexts/floors';

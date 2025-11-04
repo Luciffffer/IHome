@@ -1,14 +1,14 @@
 import { Separator } from '@/components/ui/separator';
 import { useFloorUI } from '@/contexts/floor-ui-context';
-import DoorLockControl from './door-lock-control';
-import ThermostatControl from './thermostat-control';
+import DoorLockControl from './controls/door-lock-control';
+import ThermostatControl from './controls/thermostat-control';
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash } from 'lucide-react';
-import LightControl from './light-control';
+import LightControl from './controls/light-control';
 import { useFloors } from '@/contexts/floors';
-import AudioControl from './audio-control';
+import AudioControl from './controls/audio-control';
 import { Spinner } from '@/components/ui/spinner';
-import DeleteDialog from '@/components/delete-dialog';
+import DeleteDialog from '@/components/common/delete-dialog';
 
 function DeviceDetails() {
   const { selectedDeviceId, closeSideMenu, openDeviceEdit } = useFloorUI();

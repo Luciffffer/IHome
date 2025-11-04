@@ -1,14 +1,14 @@
 import { FloorUIProvider } from '@/contexts/floor-ui-context';
 import FloorRenderer from '@/components/floor-renderer/floor-renderer';
-import { FloorSwitcher } from '@/components/floor-switcher';
+import { FloorSwitcher } from '@/components/common/floor-switcher';
 import { Header } from '@/components/layout/header';
 import Logo from '@/components/ui/logo';
 import { FloorsProvider } from '@/contexts/floors';
 import { requireAuth } from '@/lib/auth-helpers';
 
-function Home() {
-  requireAuth();
-
+async function Home() {
+  const session = await requireAuth();
+  console.log('Authenticated user:', session);
   return (
     <FloorsProvider>
       <FloorUIProvider>

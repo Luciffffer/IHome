@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { queryClient } from '@/components/react-query-provider';
+import { queryClient } from '@/components/providers/react-query-provider';
 import { IDevice } from '@/models/Device';
 import { allDevicesKey } from './keys';
 

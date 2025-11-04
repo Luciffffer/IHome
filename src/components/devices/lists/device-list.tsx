@@ -4,7 +4,6 @@ import { useFloorUI } from '@/contexts/floor-ui-context';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ChevronsUpDown } from 'lucide-react';
-import DeviceCard from './device-card';
 import { IDevice } from '@/models/Device';
 import {
   Collapsible,
@@ -12,6 +11,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
+import DeviceCard from '../cards/device-card';
 
 function DeviceList() {
   const { devices } = useFloors();

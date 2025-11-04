@@ -2,9 +2,9 @@
 
 import { Popover, PopoverTrigger } from '@radix-ui/react-popover';
 import { Controller, UseFormReturn } from 'react-hook-form';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { ChevronsUpDown, Plus, Search, X } from 'lucide-react';
-import { PopoverContent } from '../ui/popover';
+import { PopoverContent } from '@/components/ui/popover';
 import {
   Command,
   CommandEmpty,
@@ -12,12 +12,12 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '../ui/command';
+} from '@/components/ui/command';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Skeleton } from '../ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { IDevice } from '@/models/Device';
-import { Badge } from '../ui/badge';
+import { Badge } from '@/components/ui/badge';
 
 interface DevicePickerProps {
   form: UseFormReturn<{

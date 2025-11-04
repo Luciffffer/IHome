@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { toMinutes } from '../utils/schedule-conflicts';
+import { daysUntil, minutesSinceMidnight, toMinutes } from '@/lib/utils/time';
 import { useMemo } from 'react';
 
 interface Schedule {
@@ -14,20 +14,12 @@ interface SceneScheduleChipsProps {
 
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
 
-function minutesSinceMidnight(d: Date) {
-  return d.getHours() * 60 + d.getMinutes();
-}
-
 function isNowInSlot(slot: Schedule, now: Date) {
   if (now.getDay() !== slot.day) return false;
   const m = minutesSinceMidnight(now);
   const s = toMinutes(slot.start);
   const e = toMinutes(slot.end);
   return s <= m && m < e; // inclusive start, exclusive end
-}
-
-function daysUntil(fromDay: number, toDay: number) {
-  return (toDay + 7 - fromDay) % 7;
 }
 
 function SceneScheduleChips({ schedule }: SceneScheduleChipsProps) {

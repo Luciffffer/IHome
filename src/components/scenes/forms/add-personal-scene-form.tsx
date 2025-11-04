@@ -4,13 +4,13 @@ import { Separator } from '@radix-ui/react-separator';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
-import DevicePicker from '../device-picker';
-import { SceneDetailsFields } from '../scene-details-fields';
 import { Button } from '@/components/ui/button';
 import { useMutation } from '@tanstack/react-query';
 import { createPersonalScene } from '@/contexts/scenes/api';
 import { toast } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
+import DevicePicker from './device-picker';
+import { SceneDetailsFields } from './scene-details-fields';
 
 const personalSceneSchema = z.object({
   devices: z

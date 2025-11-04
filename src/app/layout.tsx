@@ -1,8 +1,8 @@
 import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import { SessionProvider } from 'next-auth/react';
-import ReactQueryProvider from '@/components/react-query-provider';
-import { ThemeProvider } from '@/contexts/theme-provider';
+import ReactQueryProvider from '@/components/providers/react-query-provider';
+import { ThemeProvider } from '@/components/providers/theme-provider';
 
 const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${poppins.variable} ${inter.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SessionProvider>

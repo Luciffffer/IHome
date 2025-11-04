@@ -2,16 +2,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Separator } from '@radix-ui/react-separator';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
-import DevicePicker from '../device-picker';
 import { Button } from '@/components/ui/button';
 import { useFloorUI } from '@/contexts/floor-ui-context';
 import { useState } from 'react';
-import SchedulePicker from '../schedule-picker';
 import { useMutation } from '@tanstack/react-query';
 import { createGlobalScene } from '@/contexts/scenes/api';
 import { toast } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
-import { SceneDetailsFields } from '../scene-details-fields';
+import DevicePicker from './device-picker';
+import SchedulePicker from './schedule-picker';
+import { SceneDetailsFields } from './scene-details-fields';
 
 const timeRe = /^([01]\d|2[0-3]):[0-5]\d$/;
 

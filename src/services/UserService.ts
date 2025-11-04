@@ -4,6 +4,7 @@ import { RegisterSchema } from "@/app/api/auth/register/route";
 
 function toIUser(doc: IUserDocument): IUser {
     return {
+        id: doc.id.toString(),
         firstName: doc.firstName,
         lastName: doc.lastName,
         email: doc.email,

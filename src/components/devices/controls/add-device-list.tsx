@@ -47,7 +47,8 @@ function AddDeviceList() {
   return (
     <nav
       className="absolute bottom-6 bg-background rounded-lg shadow-lg border border-muted 
-        px-4 py-4 z-10"
+        px-4 py-4 z-10 mx-6 max-w-full"
+      aria-label="Add device menu"
     >
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-sm font-semibold text-foreground">Add Device</h3>
@@ -55,12 +56,13 @@ function AddDeviceList() {
           variant="ghost"
           size="icon-sm"
           className="cursor-pointer"
+          aria-label="Close add device menu"
           onClick={closeAddDeviceMenu}
         >
           <X />
         </Button>
       </div>
-      <ul className="flex gap-2">
+      <ul className="flex gap-2 overflow-x-scroll">
         {deviceTemplates.map(({ type, label, icon: Icon, description }) => (
           <li key={type}>
             <button

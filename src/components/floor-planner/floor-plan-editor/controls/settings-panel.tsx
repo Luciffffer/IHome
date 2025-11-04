@@ -1,6 +1,6 @@
 'use client';
 
-import DeleteDialog from '@/components/delete-dialog';
+import DeleteDialog from '@/components/common/delete-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Field,
