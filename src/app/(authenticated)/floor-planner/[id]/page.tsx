@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import Logo from '@/components/ui/logo';
 import { FloorProvider } from '@/contexts/floor-context';
+import { requireAuth } from '@/lib/auth-helpers';
 import { FloorService } from '@/services/FloorService';
 import { Slash } from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -26,6 +27,8 @@ async function FloorPlannerPage({
   params: { id: string };
   searchParams: { initial: boolean };
 }) {
+  requireAuth();
+
   const { id } = await params;
   const floor = await FloorService.getFloorById(id);
 
