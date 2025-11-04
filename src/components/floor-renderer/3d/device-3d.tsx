@@ -34,7 +34,7 @@ function Device3D({ device }: Device3DProps) {
         {/* Icon */}
         <div
           className={`flex items-center justify-center w-12 h-12 rounded-full 
-            shadow-lg bg-white`}
+            shadow-lg bg-background dark:bg-muted`}
         >
           <DeviceIcon device={device} className="w-7 h-7" />
         </div>

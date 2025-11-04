@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { queryClient } from '@/components/react-query-provider';
 import { IDevice } from '@/models/Device';
-import { devicesKey } from './keys';
+import { allDevicesKey } from './keys';
 
 type UpdateFn = (deviceId: string, updates: Partial<IDevice>) => Promise<IDevice>;
 
@@ -18,7 +18,6 @@ function mergeShallowWithState(a: Partial<IDevice>, b: Partial<IDevice>): Partia
 }
 
 export function useDeviceUpdateQueue(
-  floorId: string | null | undefined,
   updateDevice: UpdateFn,
   debounceMs = 1000
 ) {
@@ -35,12 +34,12 @@ export function useDeviceUpdateQueue(
     const existing = optimisticOverlayRef.current.get(deviceId) || {};
     optimisticOverlayRef.current.set(deviceId, mergeShallowWithState(existing, updates));
 
-    await queryClient.cancelQueries({ queryKey: devicesKey(floorId) });
+    await queryClient.cancelQueries({ queryKey: allDevicesKey });
 
-    queryClient.setQueryData<IDevice[]>(devicesKey(floorId), old =>
+    queryClient.setQueryData<IDevice[]>(allDevicesKey, old =>
       (old ?? []).map(d => (d.id === deviceId ? (mergeShallowWithState(d, updates) as IDevice) : d))
     );
-  }, [floorId]);
+  }, []);
 
   const queueDeviceUpdate = useCallback((deviceId: string, updates: Partial<IDevice>) => {
     // optimistic UI
@@ -71,13 +70,13 @@ export function useDeviceUpdateQueue(
           if (!hasOtherPending) {
             hasPendingref.current = false;
             optimisticOverlayRef.current.clear();
-            queryClient.invalidateQueries({ queryKey: devicesKey(floorId) });
+            queryClient.invalidateQueries({ queryKey: allDevicesKey });
           }
         });
     }, debounceMs);
 
     pendingRef.current.set(deviceId, entry);
-  }, [applyOptimistic, debounceMs, updateDevice, floorId]);
+  }, [applyOptimistic, debounceMs, updateDevice]);
 
   const flushDeviceUpdates = useCallback(async (deviceId: string) => {
     const entry = pendingRef.current.get(deviceId);
@@ -98,9 +97,9 @@ export function useDeviceUpdateQueue(
     );
     if (!hasOtherPending) {
       hasPendingref.current = false;
-      queryClient.invalidateQueries({ queryKey: devicesKey(floorId) });
+      queryClient.invalidateQueries({ queryKey: allDevicesKey });
     }
-  }, [updateDevice, floorId]);
+  }, [updateDevice]);
 
   const hasPendingUpdates = useCallback(() => hasPendingref.current, []);
 

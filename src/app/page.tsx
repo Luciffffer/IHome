@@ -4,8 +4,11 @@ import { FloorSwitcher } from '@/components/floor-switcher';
 import { Header } from '@/components/layout/header';
 import Logo from '@/components/ui/logo';
 import { FloorsProvider } from '@/contexts/floors';
+import { requireAuth } from '@/lib/auth-helpers';
 
 function Home() {
+  requireAuth();
+
   return (
     <FloorsProvider>
       <FloorUIProvider>

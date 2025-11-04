@@ -51,7 +51,7 @@ function DeviceIcon({ device, className }: DeviceIconProps) {
         if (state.on) {
           return '#fbbf24';
         }
-        return '#6b7280';
+        return 'var(--muted-foreground)';
       }
       case 'thermostat': {
         const state = device.state as ThermostatState;
@@ -73,7 +73,7 @@ function DeviceIcon({ device, className }: DeviceIconProps) {
       case 'audio':
         const state = device.state as AudioState;
         if (state.volume === 0) {
-          return '#6b7280';
+          return 'var(--muted-foreground)';
         }
         return '#8b5cf6';
     }

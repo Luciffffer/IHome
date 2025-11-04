@@ -1,6 +1,8 @@
 import dbConnect from "@/lib/db";
 import { NotFoundError } from "@/lib/errors";
 import Floor, { floorDocToDTO, IFloor, IFloorDocument, normalizeFloorRooms } from "@/models/Floor";
+import { DeviceService } from "./DeviceService";
+import { IRoom } from "@/models/Room";
 
 export class FloorService {
     // Get
@@ -41,6 +43,9 @@ export class FloorService {
             throw new NotFoundError('Floor', id);
         }
 
+        // Check for devices and remove them
+        await DeviceService.removeDevicesByRoomIds(floorDoc.rooms.map((room: IRoom) => room.id));
+
         if (data.name !== undefined) floorDoc.name = data.name;
         if (data.order !== undefined) floorDoc.order = data.order;
         if (data.rooms !== undefined) floorDoc.rooms = data.rooms;
@@ -55,10 +60,15 @@ export class FloorService {
 
     static async deleteFloor(id: string): Promise<void> {
         await dbConnect();
-        const floor = await Floor.findByIdAndDelete(id);
+        const floor = await Floor.findById(id);
 
         if (!floor) {
             throw new NotFoundError('Floor', id);
         }
+
+        // Check for devices and remove them
+        await DeviceService.removeDevicesByRoomIds(floor.rooms.map((room: IRoom) => room.id));
+
+        await floor.remove();
     }
 }

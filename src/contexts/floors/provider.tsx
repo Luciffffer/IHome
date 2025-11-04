@@ -14,7 +14,7 @@ import {
   useState,
 } from 'react';
 import { toast } from 'sonner';
-import { floorsKey, devicesKey } from './keys';
+import { floorsKey, allDevicesKey } from './keys';
 import {
   fetchFloors,
   fetchDevices,
@@ -32,6 +32,7 @@ interface FloorsContextValue {
   currentFloor: IFloor | null;
 
   // Device data
+  allDevices: IDevice[];
   devices: IDevice[];
 
   // loading states
@@ -112,23 +113,19 @@ export function FloorsProvider({ children }: { children: ReactNode }) {
     }) => updateDeviceApi(deviceId, updates),
     onMutate: async () => {
       await queryClient.cancelQueries({
-        queryKey: devicesKey(currentFloor?.id),
+        queryKey: allDevicesKey,
       });
-      const previousDevices = queryClient.getQueryData<IDevice[]>(
-        devicesKey(currentFloor?.id)
-      );
+      const previousDevices =
+        queryClient.getQueryData<IDevice[]>(allDevicesKey);
       return { previousDevices };
     },
     onError: (_err, _vars, ctx) => {
-      queryClient.setQueryData(
-        devicesKey(currentFloor?.id),
-        ctx?.previousDevices
-      );
+      queryClient.setQueryData(allDevicesKey, ctx?.previousDevices);
       toast.error('Failed to update device. Please try again later.');
     },
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: devicesKey(currentFloor?.id),
+        queryKey: allDevicesKey,
       });
     },
   });
@@ -145,24 +142,29 @@ export function FloorsProvider({ children }: { children: ReactNode }) {
     flushDeviceUpdates,
     hasPendingUpdates,
     applyOverlay,
-  } = useDeviceUpdateQueue(currentFloor?.id, updateDevice, 1000);
+  } = useDeviceUpdateQueue(updateDevice, 1000);
 
-  // Fetch devices for current floor
+  // Fetch all devices
   const { data: rawDevices = [], status: devicesQueryStatus } = useQuery({
-    queryKey: devicesKey(currentFloor?.id),
-    queryFn: () =>
-      currentFloor ? fetchDevices(currentFloor.id) : Promise.resolve([]),
-    enabled: !!currentFloor?.id && !hasPendingUpdates(),
+    queryKey: allDevicesKey,
+    queryFn: () => fetchDevices(),
+    enabled: !hasPendingUpdates(),
     refetchInterval: 5000,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,
     staleTime: 0,
   });
 
-  const devices = useMemo(
+  const allDevices = useMemo(
     () => applyOverlay(rawDevices),
     [rawDevices, applyOverlay]
   );
+
+  const devices = useMemo(() => {
+    if (!currentFloor) return [];
+    const roomIds = new Set(currentFloor.rooms.map(room => room.id));
+    return allDevices.filter(device => roomIds.has(device.roomId));
+  }, [allDevices, currentFloor]);
 
   // Create floor
   const createFloorMutation = useMutation({
@@ -183,16 +185,16 @@ export function FloorsProvider({ children }: { children: ReactNode }) {
     mutationFn: createDeviceApi,
     onMutate: async () => {
       await queryClient.cancelQueries({
-        queryKey: devicesKey(currentFloor?.id),
+        queryKey: allDevicesKey,
       });
     },
     onSuccess: newDevice => {
       toast.success('Device created successfully');
-      queryClient.setQueryData<IDevice[]>(devicesKey(currentFloor?.id), old => [
+      queryClient.setQueryData<IDevice[]>(allDevicesKey, old => [
         ...(old || []),
         newDevice,
       ]);
-      queryClient.invalidateQueries({ queryKey: devicesKey(currentFloor?.id) });
+      queryClient.invalidateQueries({ queryKey: allDevicesKey });
     },
     onError: () =>
       toast.error('Failed to create device. Please try again later.'),
@@ -206,7 +208,7 @@ export function FloorsProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (_data, deviceId) => {
       toast.success('Device deleted successfully');
-      queryClient.setQueryData<IDevice[]>(devicesKey(currentFloor?.id), old =>
+      queryClient.setQueryData<IDevice[]>(allDevicesKey, old =>
         (old || []).filter(device => device.id !== deviceId)
       );
     },
@@ -216,6 +218,7 @@ export function FloorsProvider({ children }: { children: ReactNode }) {
     floors,
     currentFloorIndex,
     currentFloor,
+    allDevices,
     devices,
     floorsQueryStatus,
     devicesQueryStatus,
@@ -240,7 +243,7 @@ export function FloorsProvider({ children }: { children: ReactNode }) {
     updateDevice,
     invalidateDevices: async () => {
       await queryClient.invalidateQueries({
-        queryKey: devicesKey(currentFloor?.id),
+        queryKey: allDevicesKey,
       });
     },
     queueDeviceUpdate,

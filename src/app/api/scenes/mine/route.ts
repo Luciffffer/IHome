@@ -1,24 +1,23 @@
-import { requireAdmin, requireAuth } from "@/lib/auth-helpers";
+import { requireAuth } from "@/lib/auth-helpers";
 import { handleError } from "@/lib/error-handler";
 import { SceneService } from "@/services/SceneService";
 import { NextRequest, NextResponse } from "next/server";
 
-export interface GlobalScenePostBody {
+export interface PersonalScenePostBody {
   name: string;
   imageUrl?: string;
   description?: string;
-  schedule: {
-    day: number;
-    start: string;
-    end: string;
-  }[];
-  devices: string[]; 
+  devices: string[];
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    await requireAuth(request);
-    const scenes = await SceneService.getAllGlobalScenes();
+    const session = await requireAuth();
+
+    const userId = session!.user!.id!;
+
+    const scenes = await SceneService.getScenesByUserId(userId);
+
     return NextResponse.json({
       success: true,
       data: scenes,
@@ -30,9 +29,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
-    const body = await request.json() as GlobalScenePostBody;
-    const scene = await SceneService.createGlobalScene(body);
+    const session = await requireAuth();
+    const userId = session!.user!.id!;
+    const body = await request.json();
+    const scene = await SceneService.createPersonalScene(body as PersonalScenePostBody, userId);
     return NextResponse.json({
       success: true,
       data: scene,

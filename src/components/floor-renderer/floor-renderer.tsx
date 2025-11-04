@@ -49,46 +49,56 @@ const FloorRenderer = memo(function FloorRenderer() {
     >
       <Toaster />
       {isLoading && (
-        <div className="bg-muted h-72 w-full flex items-center justify-center">
-          <Spinner className="size-12 text-muted-foreground" />
+        <div className="flex items-center justify-center h-full w-full">
+          <div className="h-72 bg-muted w-full flex items-center justify-center">
+            <Spinner className="size-12 text-muted-foreground" />
+          </div>
         </div>
       )}
 
       {isEmpty && (
-        <Empty className="bg-muted h-72">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Logo className="!w-9" />
-            </EmptyMedia>
-            <EmptyTitle>No Floors Defined Yet!</EmptyTitle>
-            <EmptyDescription>
-              Get started by adding a new floor to your smart home system.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button className="cursor-pointer" onClick={createFloor}>
-              {isCreatingFloor ? <Spinner /> : <Plus />}
-              Add floor
-            </Button>
-          </EmptyContent>
-        </Empty>
+        <div className="w-full h-full flex items-center justify-center">
+          <Empty className="bg-muted h-72 max-h-72 w-full">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Logo className="!w-9" />
+              </EmptyMedia>
+              <EmptyTitle>No Floors Defined Yet!</EmptyTitle>
+              <EmptyDescription>
+                Get started by adding a new floor to your smart home system.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button className="cursor-pointer" onClick={createFloor}>
+                {isCreatingFloor ? <Spinner /> : <Plus />}
+                Add floor
+              </Button>
+            </EmptyContent>
+          </Empty>
+        </div>
       )}
 
       {noRooms && (
-        <Empty className="bg-muted h-72">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Logo className="!w-9" />
-            </EmptyMedia>
-            <EmptyTitle>No Rooms on This Floor Yet!</EmptyTitle>
-            <EmptyDescription>Add some rooms to get started.</EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button className="cursor-pointer" asChild>
-              <Link href={`/floor-planner/${currentFloor.id}`}>Edit floor</Link>
-            </Button>
-          </EmptyContent>
-        </Empty>
+        <div className="w-full h-full flex items-center justify-center">
+          <Empty className="bg-muted h-72">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Logo className="!w-9" />
+              </EmptyMedia>
+              <EmptyTitle>No Rooms on This Floor Yet!</EmptyTitle>
+              <EmptyDescription>
+                Add some rooms to get started.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button className="cursor-pointer" asChild>
+                <Link href={`/floor-planner/${currentFloor.id}`}>
+                  Edit floor
+                </Link>
+              </Button>
+            </EmptyContent>
+          </Empty>
+        </div>
       )}
 
       {hasRooms && <Floor3DRenderer />}

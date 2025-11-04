@@ -1,8 +1,16 @@
 import { auth } from '@/auth';
 import { UnauthorizedError, ForbiddenError } from './errors';
+import { NextRequest } from 'next/server';
 
-export async function requireAuth() {
+export async function requireAuth(request: NextRequest | null = null) {
   const session = await auth();
+
+  if (request) {
+    const token = request.headers.get('Authorization')?.replace('Bearer ', '');
+    if (token === process.env.API_BEARER_TOKEN) {
+      return null;
+    }
+  }
 
   if (!session?.user?.email) {
     throw new UnauthorizedError();

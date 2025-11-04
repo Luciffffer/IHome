@@ -14,6 +14,7 @@ import EditDeviceForm from './edit-device-form';
 import DeviceList from './device-list';
 import ScenesList from './scenes-list';
 import AddGlobalSceneForm from './add-global-scene-form';
+import AddPersonalSceneForm from './add-personal-scene-form';
 
 function SideMenu() {
   const {
@@ -69,6 +70,7 @@ function SideMenu() {
               }`}
             {sideMenuMode === 'scenes' && 'Scenes'}
             {sideMenuMode === 'add-global-scene' && 'Add Global Scene'}
+            {sideMenuMode === 'add-personal-scene' && 'Add Personal Scene'}
           </h2>
         </SidePopupMenuHeader>
         {sideMenuMode === 'device-list' && <DeviceList />}
@@ -77,6 +79,7 @@ function SideMenu() {
         {sideMenuMode === 'device-edit' && <EditDeviceForm />}
         {sideMenuMode === 'scenes' && <ScenesList />}
         {sideMenuMode === 'add-global-scene' && <AddGlobalSceneForm />}
+        {sideMenuMode === 'add-personal-scene' && <AddPersonalSceneForm />}
       </SidePopupMenuContent>
     </SidePopupMenu>
   );

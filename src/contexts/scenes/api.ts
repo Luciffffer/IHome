@@ -37,3 +37,20 @@ export async function createGlobalScene(scene: Partial<IScene>): Promise<IScene>
   if (!res.ok) throw new Error('Failed to create global scene');
   return (await res.json()).data as IScene;
 }
+
+export async function createPersonalScene(scene: Partial<IScene>): Promise<IScene> {
+  const res = await fetch('/api/scenes/mine', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(scene)
+  });
+  if (!res.ok) throw new Error('Failed to create personal scene');
+  return (await res.json()).data as IScene;
+}
+
+export async function deleteScene(sceneId: string): Promise<void> {
+  const res = await fetch(`/api/scenes/${sceneId}`, {
+    method: 'DELETE'
+  });
+  if (!res.ok) throw new Error('Failed to delete scene');
+}

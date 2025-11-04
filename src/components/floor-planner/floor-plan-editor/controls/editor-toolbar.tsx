@@ -19,7 +19,7 @@ export function EditorToolbar({
   return (
     <nav
       aria-label="Control selector"
-      className="absolute bottom-6 bg-white left-1/2 -translate-x-1/2 shadow-2xl rounded-xl"
+      className="absolute bottom-6 bg-background left-1/2 -translate-x-1/2 shadow-2xl rounded-xl"
     >
       <ul className="h-14 flex items-center justify-center gap-3 px-2 *:[li]:py-2">
         <li>
@@ -44,11 +44,11 @@ export function EditorToolbar({
             <Pencil />
           </Button>
         </li>
-        <hr className="h-full w-px bg-gray-300 shrink-0" />
+        <hr className="h-full w-px bg-muted shrink-0" />
         <li>
           <SettingsPanel />
         </li>
-        <hr className="h-full w-px bg-gray-300 shrink-0" />
+        <hr className="h-full w-px bg-muted shrink-0" />
         <li>
           <Button
             size="lg"

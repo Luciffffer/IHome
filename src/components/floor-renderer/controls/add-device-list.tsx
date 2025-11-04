@@ -46,11 +46,11 @@ function AddDeviceList() {
 
   return (
     <nav
-      className="absolute bottom-6 bg-white rounded-lg shadow-lg border border-gray-200 
+      className="absolute bottom-6 bg-background rounded-lg shadow-lg border border-muted 
         px-4 py-4 z-10"
     >
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-sm font-semibold text-gray-700">Add Device</h3>
+        <h3 className="text-sm font-semibold text-foreground">Add Device</h3>
         <Button
           variant="ghost"
           size="icon-sm"
@@ -70,7 +70,7 @@ function AddDeviceList() {
                 'border-2 border-dashed w-24 h-20',
                 placingDeviceType === type
                   ? 'border-primary bg-primary/10'
-                  : 'border-gray-300 hover:border-primary hover:bg-primary/5',
+                  : 'border-muted-foreground hover:border-primary hover:bg-primary/5',
                 'cursor-pointer transition-colors duration-200',
                 'min-w-[80px]'
               )}
@@ -79,13 +79,17 @@ function AddDeviceList() {
               <Icon
                 className={cn(
                   'w-6 h-6',
-                  placingDeviceType === type ? 'text-primary' : 'text-gray-600'
+                  placingDeviceType === type
+                    ? 'text-primary'
+                    : 'text-muted-foreground'
                 )}
               />
               <span
                 className={cn(
                   'text-xs font-medium',
-                  placingDeviceType === type ? 'text-primary' : 'text-gray-700'
+                  placingDeviceType === type
+                    ? 'text-primary'
+                    : 'text-muted-foreground'
                 )}
               >
                 {label}

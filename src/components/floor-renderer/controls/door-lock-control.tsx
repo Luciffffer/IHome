@@ -91,7 +91,7 @@ function DoorLockControl({ device }: DoorLockControlProps) {
           onClick={() => setLocked(true)}
           className={`cursor-pointer transition-colors ${
             isLocked
-              ? 'bg-rose-600 text-white'
+              ? '!bg-rose-600 text-white'
               : 'border border-border hover:bg-rose-50 text-foreground'
           }`}
         >
@@ -103,7 +103,7 @@ function DoorLockControl({ device }: DoorLockControlProps) {
           onClick={() => setLocked(false)}
           className={`cursor-pointer transition-colors ${
             !isLocked
-              ? 'bg-emerald-600 text-white'
+              ? '!bg-emerald-600 text-white'
               : 'border border-border hover:bg-emerald-50 text-foreground'
           }`}
         >

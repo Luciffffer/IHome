@@ -10,7 +10,8 @@ type SideMenuMode =
   | 'device-form'
   | 'device-edit'
   | 'scenes'
-  | 'add-global-scene';
+  | 'add-global-scene'
+  | 'add-personal-scene';
 
 interface FloorUIState {
   // View settings
@@ -55,6 +56,9 @@ interface FloorUIContextValue extends FloorUIState {
 
   // Open add global scene
   openAddGlobalScene: () => void;
+
+  // Add personal scene
+  openAddPersonalScene: () => void;
 
   // Add device menu actions
   openAddDeviceMenu: () => void;
@@ -204,6 +208,17 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  // Open add personal scene
+  const openAddPersonalScene = () => {
+    setState(prev => ({
+      ...prev,
+      sideMenuMode: 'add-personal-scene',
+      selectedDeviceId: null,
+      pendingDevice: null,
+      sideMenuOpen: true,
+    }));
+  };
+
   // Add device menu actions
   const openAddDeviceMenu = () => {
     setState(prev => ({
@@ -246,6 +261,7 @@ export function FloorUIProvider({ children }: { children: React.ReactNode }) {
         openDeviceEdit,
         openScenes,
         openAddGlobalScene,
+        openAddPersonalScene,
         openAddDeviceMenu,
         closeAddDeviceMenu,
       }}

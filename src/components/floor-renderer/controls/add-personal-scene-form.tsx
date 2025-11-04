@@ -1,39 +1,21 @@
+import { useFloorUI } from '@/contexts/floor-ui-context';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Separator } from '@radix-ui/react-separator';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
 import DevicePicker from '../device-picker';
+import { SceneDetailsFields } from '../scene-details-fields';
 import { Button } from '@/components/ui/button';
-import { useFloorUI } from '@/contexts/floor-ui-context';
-import { useState } from 'react';
-import SchedulePicker from '../schedule-picker';
 import { useMutation } from '@tanstack/react-query';
-import { createGlobalScene } from '@/contexts/scenes/api';
+import { createPersonalScene } from '@/contexts/scenes/api';
 import { toast } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
-import { SceneDetailsFields } from '../scene-details-fields';
 
-const timeRe = /^([01]\d|2[0-3]):[0-5]\d$/;
-
-const slotSchema = z
-  .object({
-    day: z.number().min(0).max(6),
-    start: z.string().regex(timeRe, 'Invalid time format (HH:MM)'),
-    end: z.string().regex(timeRe, 'Invalid time format (HH:MM)'),
-  })
-  .refine(v => v.start < v.end, {
-    message: 'Start time must be before end time',
-    path: ['end'],
-  });
-
-const globalSceneSchema = z.object({
+const personalSceneSchema = z.object({
   devices: z
     .array(z.string().min(1, 'Invalid Device ID'))
     .min(1, 'At least one device is required'),
-  schedule: z
-    .array(slotSchema)
-    .min(1, 'At least one time slot is required')
-    .optional(),
   name: z.string().min(1, 'Name is required').max(32, 'Name is too long'),
   description: z.string().max(256, 'Description is too long').optional(),
   imageUrl: z
@@ -45,47 +27,48 @@ const globalSceneSchema = z.object({
     .optional(),
 });
 
-type GlobalSceneFormValues = z.infer<typeof globalSceneSchema>;
+type PersonalSceneFormValues = z.infer<typeof personalSceneSchema>;
 
-function AddGlobalSceneForm() {
+function AddPersonalSceneForm() {
   const { openScenes } = useFloorUI();
-  const [step, setStep] = useState<0 | 1 | 2>(0);
+  const [step, setStep] = useState<0 | 1>(0);
 
-  const form = useForm<GlobalSceneFormValues>({
-    resolver: zodResolver(globalSceneSchema),
+  const form = useForm<PersonalSceneFormValues>({
+    resolver: zodResolver(personalSceneSchema),
     defaultValues: {
+      devices: [],
       name: '',
       description: '',
       imageUrl: '',
-      devices: [],
-      schedule: [],
     },
     mode: 'onChange',
   });
 
   const mutation = useMutation({
-    mutationFn: createGlobalScene,
+    mutationFn: createPersonalScene,
     onSuccess: () => {
-      toast.success('Global scene created successfully.');
+      toast.success('Personal scene created successfully.');
       openScenes();
     },
     onError: () => {
-      toast.error('Failed to create global scene. Please try again.');
+      toast.error('Failed to create personal scene. Please try again.');
     },
   });
 
-  const handleFormSubmit = (data: GlobalSceneFormValues) => {
+  const handleFormSubmit = (data: PersonalSceneFormValues) => {
     mutation.mutate(data);
   };
 
   const next = async () => {
-    const fieldsPerStep: Record<number, Array<keyof GlobalSceneFormValues>> = {
+    const fieldsPerStep: Record<
+      number,
+      Array<keyof PersonalSceneFormValues>
+    > = {
       0: ['devices'],
-      1: ['schedule'],
-      2: ['name', 'imageUrl', 'description'],
+      1: ['name', 'imageUrl', 'description'],
     };
     const ok = await form.trigger(fieldsPerStep[step], { shouldFocus: true });
-    if (ok) setStep(prev => (prev === 2 ? 2 : ((prev + 1) as 1 | 2)));
+    if (ok) setStep(prev => (prev === 1 ? 1 : ((prev + 1) as 1)));
   };
 
   const back = () => setStep(prev => (prev === 0 ? 0 : ((prev - 1) as 0 | 1)));
@@ -103,13 +86,7 @@ function AddGlobalSceneForm() {
         <span
           className={step === 1 ? 'font-semibold' : 'text-muted-foreground'}
         >
-          2. Schedule
-        </span>
-        <span className="text-muted-foreground">/</span>
-        <span
-          className={step === 2 ? 'font-semibold' : 'text-muted-foreground'}
-        >
-          3. Details
+          2. Details
         </span>
       </div>
       <Separator
@@ -124,8 +101,8 @@ function AddGlobalSceneForm() {
           <>
             <p className="font-body-sm text-muted-foreground mb-3">
               Select the devices you want to include in this global scene. The{' '}
-              <strong>current states</strong> of these devices will be saved and
-              applied when the scene is activated.
+              <strong className="text-primary">current states</strong> of these
+              devices will be saved and applied when the scene is activated.
             </p>
 
             {/* Need to use any because use form has a complex structure */}
@@ -138,17 +115,10 @@ function AddGlobalSceneForm() {
           <>
             {/* Need to use any because use form has a complex structure */}
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            <SchedulePicker form={form as any} />
-          </>
-        )}
-
-        {step === 2 && (
-          <>
-            {/* Need to use any because use form has a complex structure */}
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <SceneDetailsFields form={form as any} />
           </>
         )}
+
         <Separator
           orientation="horizontal"
           className="my-3 mt-9 bg-border -mx-4 !w-auto h-px"
@@ -164,7 +134,7 @@ function AddGlobalSceneForm() {
             </Button>
           )}
 
-          {step < 2 ? (
+          {step < 1 ? (
             <Button
               type="button"
               onClick={e => {
@@ -177,7 +147,7 @@ function AddGlobalSceneForm() {
           ) : (
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending && <Spinner />}
-              Create Global Scene
+              Create Personal Scene
             </Button>
           )}
         </div>
@@ -186,4 +156,4 @@ function AddGlobalSceneForm() {
   );
 }
 
-export default AddGlobalSceneForm;
+export default AddPersonalSceneForm;

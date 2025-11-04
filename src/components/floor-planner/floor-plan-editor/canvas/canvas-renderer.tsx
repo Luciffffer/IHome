@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { IRoom } from '@/models/Room';
 import { GRID_SIZE } from '../utils/grid';
 import { drawRooms } from './draw-rooms';
+import { useTheme } from 'next-themes';
 
 interface CanvasRendererProps {
   canvasSize: { width: number; height: number };
@@ -29,6 +30,7 @@ export function CanvasRenderer({
   tempRoom,
 }: CanvasRendererProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { resolvedTheme: theme } = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -44,7 +46,7 @@ export function CanvasRenderer({
     ctx.scale(zoom, zoom);
 
     // Draw grid
-    ctx.strokeStyle = '#ddd';
+    ctx.strokeStyle = theme === 'dark' ? '#444' : '#ddd';
     ctx.lineWidth = 1 / zoom;
 
     // Calculate visible bounds in world coordinates
@@ -83,7 +85,8 @@ export function CanvasRenderer({
       startPoint,
       currentPoint,
       isValidPlacement,
-      selectedRoom
+      selectedRoom,
+      theme
     );
 
     ctx.restore();
@@ -98,6 +101,7 @@ export function CanvasRenderer({
     isValidPlacement,
     selectedRoom,
     tempRoom,
+    theme,
   ]);
 
   return (

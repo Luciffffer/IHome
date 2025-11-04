@@ -62,7 +62,8 @@ function LightControl({ device }: LightControlProps) {
   const setB = (value: number) => {
     const next = clamp(value, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
     setBrightness(next);
-    pushUpdate({ brightness: next });
+    setOn(next > 0);
+    pushUpdate({ brightness: next, on: next > 0 });
   };
 
   const glowIntensity = on ? brightness / 100 : 0;

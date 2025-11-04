@@ -163,7 +163,7 @@ function SidePopupMenuContent({
     >
       <div className="h-full flex flex-col min-h-0">
         <ScrollArea
-          className="w-full bg-background border border-gray-300 shadow-lg 
+          className="w-full bg-background border border-muted shadow-lg 
           rounded-2xl pointer-events-auto max-h-full *:max-h-full"
         >
           <div className="p-4">

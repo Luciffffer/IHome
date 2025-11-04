@@ -2,6 +2,7 @@ import dbConnect from "@/lib/db";
 import Device, { deviceDocToDto, getDefaultDeviceState, IDevice } from "@/models/Device";
 import { FloorService } from "./FloorService";
 import { NotFoundError } from "@/lib/errors";
+import { SceneService } from "./SceneService";
 
 export class DeviceService {
   // Get
@@ -27,6 +28,13 @@ export class DeviceService {
     await dbConnect();
     const devices = await Device.find();
     return devices.map(deviceDocToDto);
+  }
+
+  static async getDeviceById(id: string): Promise<IDevice> {
+    await dbConnect();
+    const device = await Device.findById(id);
+    if (!device) throw new NotFoundError('Device', id);
+    return deviceDocToDto(device);
   }
 
   // Create
@@ -56,7 +64,16 @@ export class DeviceService {
 
   static async deleteDevice(id: string): Promise<void> {
     await dbConnect();
+    await SceneService.removeDeviceFromScenes(id);
     const result = await Device.findByIdAndDelete(id);
     if (!result) throw new NotFoundError('Device', id);
+  }
+
+  // Helpers
+
+  static async removeDevicesByRoomIds(roomIds: string[]): Promise<void> {
+    await dbConnect();
+    await SceneService.removeDevicesFromScenesByRoomIds(roomIds);
+    await Device.deleteMany({ roomId: { $in: roomIds } });
   }
 }

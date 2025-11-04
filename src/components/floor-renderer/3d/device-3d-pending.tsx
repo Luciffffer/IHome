@@ -42,7 +42,7 @@ function Device3DPending() {
         {/* Icon */}
         <div
           className={`flex items-center justify-center w-12 h-12 rounded-full shadow-lg 
-            bg-muted`}
+            bg-background dark:bg-muted`}
         >
           <Icon className="w-7 h-7 animate-pulse" style={{ color }} />
         </div>

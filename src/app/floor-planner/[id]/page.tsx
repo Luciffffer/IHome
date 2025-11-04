@@ -53,10 +53,10 @@ async function FloorPlannerPage({
                 <Slash />
               </BreadcrumbSeparator>
               <BreadcrumbItem>Floor Editor</BreadcrumbItem>
-              <BreadcrumbSeparator>
+              <BreadcrumbSeparator className="hidden md:block">
                 <Slash />
               </BreadcrumbSeparator>
-              <BreadcrumbItem>
+              <BreadcrumbItem className="hidden md:block">
                 <EditingTitle />
               </BreadcrumbItem>
             </BreadcrumbList>

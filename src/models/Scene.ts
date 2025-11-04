@@ -18,6 +18,7 @@ export interface IScene {
   type: SceneType;
   userId?: string;
   schedule?: TimeSlot[];
+  actions: ISceneAction[];
 }
 
 export interface ISceneAction {
@@ -31,7 +32,7 @@ const SceneSchema = new mongoose.Schema<ISceneDocument>({
   name: { type: String, required: true, trim: true, maxLength: 32 },
   imageUrl: { type: String, required: false, trim: true },
   description: { type: String, required: false, trim: true, maxLength: 256 },
-  enabled: { type: Boolean, required: true, default: true },
+  enabled: { type: Boolean, required: true, default: false },
   type: { type: String, enum: ['user', 'global'], required: true },
   userId: { type: String, required: false },
   schedule: {
@@ -43,7 +44,30 @@ const SceneSchema = new mongoose.Schema<ISceneDocument>({
       },
     ],
     required: false,
+  },
+  actions: {
+    type: [
+      {
+        deviceId: { type: String, required: true },
+        state: { type: Object, required: true },
+      },
+    ],
+    required: true,
   }
 });
+
+export function sceneDocToDto(scene: ISceneDocument): IScene {
+  return {
+    id: scene.id.toString(),
+    name: scene.name,
+    imageUrl: scene.imageUrl,
+    description: scene.description,
+    enabled: scene.enabled,
+    type: scene.type,
+    userId: scene.userId,
+    schedule: scene.schedule,
+    actions: scene.actions,
+  };
+}
 
 export default mongoose.models.Scene || mongoose.model<ISceneDocument>('Scene', SceneSchema);

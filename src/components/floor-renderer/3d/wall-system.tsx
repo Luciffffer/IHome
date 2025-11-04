@@ -10,6 +10,7 @@ import {
 } from './utils/wall-geometry';
 import { FLOOR_HEIGHT, WALL_THICKNESS } from './utils/constants';
 import { frostedWallProps, topMaterialProps } from './utils/wall-materials';
+import { useTheme } from 'next-themes';
 
 interface PolygonClipping {
   union: (...polygons: number[][][][]) => number[][][][];
@@ -24,6 +25,8 @@ interface WallSystemProps {
 }
 
 export function WallSystem({ rooms }: WallSystemProps) {
+  const { resolvedTheme } = useTheme();
+
   const {
     exteriorGeometry,
     interiorGeometry,
@@ -95,7 +98,7 @@ export function WallSystem({ rooms }: WallSystemProps) {
     <group>
       {/* Exterior walls (full height) */}
       <mesh geometry={exteriorGeometry}>
-        <meshPhysicalMaterial {...frostedWallProps} />
+        <meshPhysicalMaterial {...frostedWallProps(resolvedTheme)} />
       </mesh>
 
       {/* Solid tops for exterior walls */}
@@ -105,13 +108,13 @@ export function WallSystem({ rooms }: WallSystemProps) {
           renderOrder={100}
           position={[0, 0.001, 0]}
         >
-          <meshBasicMaterial {...topMaterialProps} />
+          <meshBasicMaterial {...topMaterialProps(resolvedTheme)} />
         </mesh>
       )}
 
       {/* Interior walls (stub height) */}
       <mesh geometry={interiorGeometry}>
-        <meshPhysicalMaterial {...frostedWallProps} />
+        <meshPhysicalMaterial {...frostedWallProps(resolvedTheme)} />
       </mesh>
 
       {/* Solid tops for exterior walls */}
@@ -121,7 +124,7 @@ export function WallSystem({ rooms }: WallSystemProps) {
           renderOrder={100}
           position={[0, 0.001, 0]}
         >
-          <meshBasicMaterial {...topMaterialProps} />
+          <meshBasicMaterial {...topMaterialProps(resolvedTheme)} />
         </mesh>
       )}
     </group>

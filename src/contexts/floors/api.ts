@@ -9,8 +9,8 @@ export async function fetchFloors(): Promise<IFloor[]> {
   return json.data as IFloor[];
 }
 
-export async function fetchDevices(floorId: string): Promise<IDevice[]> {
-  const res = await fetch(`/api/devices?floorId=${floorId}`);
+export async function fetchDevices(floorId: string | null = null): Promise<IDevice[]> {
+  const res = await fetch(`/api/devices${floorId ? `?floorId=${floorId}` : ''}`);
   if (!res.ok) throw new Error(`Failed to fetch devices: ${res.statusText}`);
   const json = await res.json();
   if (!json.success) throw new Error(json.error || 'Failed to fetch devices');

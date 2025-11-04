@@ -11,7 +11,8 @@ export const drawRooms = (
   startPoint: { x: number; y: number } | null,
   currentPoint: { x: number; y: number } | null,
   isValidPlacement: boolean,
-  selectedRoom: IRoom | null
+  selectedRoom: IRoom | null,
+  theme: string | undefined
 ) => {
   // Draw existing rooms
   ctx.lineWidth = 2 / zoom;
@@ -19,7 +20,7 @@ export const drawRooms = (
   rooms.forEach(room => {
     if (tempRoom && room.id === tempRoom.id) return; // skip temp room
 
-    ctx.strokeStyle = 'rgba(180, 180, 180, 1)';
+    ctx.strokeStyle = theme === 'dark' ? '#999' : 'rgba(180, 180, 180, 1)';
     ctx.fillStyle = room.color + '50'; // semi-transparent fill
     ctx.fillRect(
       room.x * GRID_SIZE,
@@ -35,7 +36,7 @@ export const drawRooms = (
     );
 
     // Draw room name in the center
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = theme === 'dark' ? '#eee' : '#000';
     ctx.font = `${14 / zoom}px Inter, sans-serif`;
     ctx.fillText(
       room.name,

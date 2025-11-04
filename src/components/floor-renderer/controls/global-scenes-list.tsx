@@ -9,9 +9,7 @@ import { sceneKeys } from '@/contexts/scenes/keys';
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import Image from 'next/image';
-import { toMinutes } from '../utils/schedule-conflicts';
-import { Badge } from '@/components/ui/badge';
+import SceneCard from './scene-card';
 
 function GlobalScenesList() {
   const { openAddGlobalScene } = useFloorUI();
@@ -36,11 +34,11 @@ function GlobalScenesList() {
             onClick={openAddGlobalScene}
           >
             <Plus />
-            Add Global Scene
+            Save global scene
           </Button>
           <Separator
             orientation="horizontal"
-            className="my-3 bg-border -mx-4 !w-auto"
+            className="my-3 mt-5 bg-border -mx-4 !w-auto"
           />
         </>
       )}
@@ -69,74 +67,7 @@ function GlobalScenesList() {
       {globalScenesStatus === 'success' && globalScenes.length > 0 && (
         <ul className="flex flex-col gap-2">
           {globalScenes.map(scene => {
-            let active = false;
-            let timeSlotsToday: { start: string; end: string } | null = null;
-
-            const now = new Date();
-            const currentDay = now.getDay();
-            const currentTime = now.getHours() * 60 + now.getMinutes();
-            if (scene.schedule) {
-              for (const slot of scene.schedule) {
-                const { day, start, end } = slot;
-                if (currentDay === day) {
-                  timeSlotsToday = { start, end };
-                  if (
-                    currentTime < toMinutes(start) ||
-                    currentTime > toMinutes(end)
-                  ) {
-                    active = true;
-                  }
-                  break;
-                }
-              }
-            }
-
-            return (
-              <li key={scene!.name} className="block w-full">
-                <button
-                  type="button"
-                  disabled={active}
-                  className={`group text-left rounded-lg border border-border 
-                  bg-card hover:bg-accent/30 transition-colors shadow-sm 
-                  hover:shadow p-4 focus:outline-none focus:ring-2 focus:ring-ring
-                  cursor-pointer w-full block
-                  ${
-                    active ? 'cursor-not-allowed bg-muted hover:bg-muted' : ''
-                  }`}
-                >
-                  <div className="flex items-start gap-3 w-full">
-                    <div className="rounded-md border border-border/70 bg-muted/40">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={scene.imageUrl!}
-                        alt={scene.name ?? 'Scene image'}
-                        className="h-10 w-10 rounded-md object-cover"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="font-medium truncate">
-                          {scene.name ?? 'Unnamed device'}
-                        </div>
-                        {active && <Badge variant="default">Active</Badge>}
-                      </div>
-                      {scene.description ? (
-                        <div className="text-muted-foreground text-sm mt-0.5 w-full">
-                          {scene.description}
-                        </div>
-                      ) : null}
-
-                      {timeSlotsToday && (
-                        <div className="text-xs mt-2 text-foreground/80">
-                          Scheduled today from {timeSlotsToday.start} to{' '}
-                          {timeSlotsToday.end}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              </li>
-            );
+            return <SceneCard scene={scene} key={scene.id} />;
           })}
         </ul>
       )}

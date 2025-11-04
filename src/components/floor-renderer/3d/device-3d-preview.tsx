@@ -44,7 +44,7 @@ function Device3DPreview({
         {/* Icon */}
         <div
           className={`flex items-center justify-center w-12 h-12 rounded-full shadow-lg ${
-            isValid ? 'bg-white' : 'bg-red-100'
+            isValid ? 'bg-background dark:bg-muted' : 'bg-red-100'
           }`}
         >
           <Icon

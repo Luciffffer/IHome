@@ -2,6 +2,7 @@ import mongoose, { Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 export interface IUser {
+    id: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -10,7 +11,13 @@ export interface IUser {
     role: 'user' | 'admin';
 }
 
-export interface IUserDocument extends Document, IUser {
+export interface IUserDocument extends Document {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    profilePicture?: string;
+    role: 'user' | 'admin';
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
