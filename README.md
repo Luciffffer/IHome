@@ -37,3 +37,38 @@ Zaken die gepland zijn, in ontwikkeling zijn of nog niet zijn geïmplementeerd.
 Voorbeeld:
 
 - [ ] [US3] Bulk acties van devices in een bepaalde kamer. (het kan in princiepe wel met personal scenes, maar is niet heel intuitief. Ik wilde initieel kamers ook selecteerbaar maken maar ik had niet genoeg tijd)
+
+## Setup
+
+### Mongodb
+
+De applicatie heeft een mongodb databank nodig om te runnen. Er is een docker compose file voor een mongodb container te maken.
+
+### Environment variables
+
+Je hebt ook een `.env.local` file nodig met volgende content:
+
+```bash
+AUTH_SECRET="rQqwbPLOayc9xVK3/40pxksZ3bM6SWF9mPinNZZUWFU="
+MONGODB_URI=
+API_BEARER_TOKEN="cron-secret"
+AUTH_URL=http://localhost:3000
+AUTH_TRUST_HOST=true
+```
+
+### User aanmaken via API.
+
+Om te kunnen inloggen moet je een user registreren. Dit doe je door een POST request te sturen naar `http://localhost:3000/api/auth/register`.
+
+De body is als volgt:
+
+```json
+{
+  "email": "koray.sels@test.be",
+  "password": "123456",
+  "firstName": "Koray",
+  "lastName": "Sels",
+  "profilePicture": "https://media.licdn.com/dms/image/v2/C4D03AQGHrltVdzoL5w/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1649426527389?e=1763596800&v=beta&t=t5xhvRqmohGKkQ6si-NhoB2PJgblhU8SjIwaAQ1zdsY",
+  "role": "admin"
+}
+```
