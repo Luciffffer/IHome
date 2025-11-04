@@ -7,8 +7,8 @@ import { FloorsProvider } from '@/contexts/floors';
 import { requireAuth } from '@/lib/auth-helpers';
 
 async function Home() {
-  const session = await requireAuth();
-  console.log('Authenticated user:', session);
+  await requireAuth();
+
   return (
     <FloorsProvider>
       <FloorUIProvider>
