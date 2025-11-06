@@ -76,7 +76,7 @@ export function WallSystem({ rooms }: WallSystemProps) {
       interiorGeom.computeVertexNormals();
     }
 
-    // extract top faces as before if you still want solid tops (optional)
+    // extract top faces
     const topExteriorGeometry =
       exteriorGeom && exteriorGeom.attributes.position
         ? extractTopTriangles(exteriorGeom)
