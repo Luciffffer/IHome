@@ -1,74 +1,97 @@
-# IHome
+# IHome - Smart Home Management Interface
 
-## Uitdagingen & Prestaties
+A modern, feature-rich Next.js application for managing smart home devices with interactive 3D floor visualization and intelligent scene automation. Built as a UI3 course project at Karel de Grote University of Applied Sciences and Arts to showcase advanced frontend development skills.
 
-Het moeilijkste onderdeel om te maken waren de floor/room editor en de 3D-visualisatie van een vloer. Dat waren twee dingen die ik nog nooit eerder had gedaan, dus ik moest onderweg redelijk veel bijleren. Inclusief een veel wiskunde 😭. Het was zeker geen eenvoudige opdracht, maar ik ben tevreden met het eindresultaat dat ik heb neergezet, ook al heeft het veel tijd gekost.
+> **Note:** This is a portfolio/demonstration project focused on frontend excellence, not intended for production use.
 
-Een ander uitdagend aspect was het werken met canvases en het feit dat bijna alles zich binnen één enkel scherm afspeelt. Daardoor moest er veel state worden bijgehouden, wat al snel behoorlijk rommelig kan worden. Toch ben ik blij met hoe overzichtelijk ik het heb weten te houden. Het is misschien niet perfect, maar zeker ook niet slecht.
+## Key Features
 
----
+### Interactive 3D Floor Planning
 
-## ✅ Afgewerkte Functionaliteiten
+- **Real-time 3D Rendering**: Immersive floor visualization using Three.js and React Three Fiber
 
-Lijst van alle functies die met succes zijn geïmplementeerd en getest.
+![3D Floor](/public/images/3d-floor.png)
 
-Voorbeeld:
+- **Custom Floor Editor**: Draw and design floor plans with rooms and walls
 
-- [x] [US1] Verdiepingen beheren (CRUD) om een gebouw met meerdere verdiepingen te structureren.
-- [x] [US2] Kamers beheren (CRU) om een grondplan (bovenaanzicht) per verdieping aan te maken.
-- [x] [US3] Domotica controls beheren (CRUD) zodat deze beschikbaar zijn voor gebruikers.
-- [x] [US4] Globale scenes beheren (CRUD) zodat deze toegankelijk zijn voor alle gebruikers.
-- [x] [US5] Tijdsloten koppelen aan scènes (CRUD) zodat deze periodiek actief worden.
-- [x] [US6] Domotica controls zoeken, filteren, bekijken en aanpassen.
-- [x] [US7] Scenes (CRUD) beheren om eenvoudig eigen voorkeuren in te stellen.
-- [x] [US8] Scenes activeren en deactiveren om onmiddellijk een bepaalde situatie of sfeer te bekomen
-- [x] [US9] De interface in dark/light/system modus zetten (system volgt het dark/light schema van het systeem van de gebruiker).
-- [x] [US11] Meer geavanceerde tijdschema's kunnen instellen (weekdagen, kalender)
-- [x] [US13] Verdiepingen en kamers interactief kunnen aanmaken via slepen, resize handles,..
-- [x] [US14] Verdiepingen en kamers in 3D weer te geven (met Three.js bv dmv react three fiber )
-- [x] [TECH] Complexere architectuur.
+![Floor Editor](/public/images/floor-editor.png)
 
----
+- **Device Placement**: Drag-and-drop devices onto floor plans with real-time 3D preview
 
-## ❌ Onvoltooide / Geplande Functionaliteiten
+- **Grid Overlay System**: Precise positioning with visual grid guides
 
-Zaken die gepland zijn, in ontwikkeling zijn of nog niet zijn geïmplementeerd.
+![Device Placement](/public/images/device-placement.png)
 
-Voorbeeld:
+![Device Placement 2](/public/images/device-placement-2.png)
 
-- [ ] [US3] Bulk acties van devices in een bepaalde kamer. (het kan in princiepe wel met personal scenes, maar is niet heel intuitief. Ik wilde initieel kamers ook selecteerbaar maken maar ik had niet genoeg tijd)
+### Device Management
 
-## Setup
+- **Multi-Device Support**:
+  - Smart Lights (brightness control, on/off)
+  - Thermostats (temperature adjustment)
+  - Door Locks (lock/unlock)
+  - Audio Systems (playlist selection, volume control)
+- **Real-time State Updates**: Optimistic UI updates with TanStack Query
+- **Device Details Panel**: Comprehensive device information and controls
 
-### Mongodb
+![Light Device](/public/images/light-device.png)
+![Thermostat Device](/public/images/thermostat-device.png)
+![Audio Device](/public/images/audio-device.png)
+![Doorlock Device](/public/images/door-lock-device.png)
 
-De applicatie heeft een mongodb databank nodig om te runnen. Er is een docker compose file voor een mongodb container te maken.
+### Scene Automation
 
-### Environment variables
+- **Custom Scenes**: Create personal automation scenes
+- **Global Scenes**: Admin-managed scenes for all users
+- **Time-based Scheduling**: Automate scenes based on time slots and days of week
+- **Fast Actions**: Quick access to common automation tasks (lock all doors, turn off all lights, etc.)
+- **Scene Activation**: One-click scene execution affecting multiple devices
 
-Je hebt ook een `.env.local` file nodig met volgende content:
+![Fast Scenes](/public/images/fast-scenes.png)
+![Global Scenes](/public/images/global-scenes.png)
 
-```bash
-AUTH_SECRET="rQqwbPLOayc9xVK3/40pxksZ3bM6SWF9mPinNZZUWFU="
-MONGODB_URI=
-API_BEARER_TOKEN="cron-secret"
-AUTH_URL=http://localhost:3000
-AUTH_TRUST_HOST=true
-```
+### Authentication & Authorization
 
-### User aanmaken via API.
+- **NextAuth.js Integration**: Secure credential-based authentication
+- **Role-based Access**: User and Admin roles with different permissions
+- **Protected Routes**: Middleware-based route protection
+- **Session Management**: Persistent user sessions
 
-Om te kunnen inloggen moet je een user registreren. Dit doe je door een POST request te sturen naar `http://localhost:3000/api/auth/register`.
+## Technology Stack
 
-De body is als volgt:
+### Frontend
 
-```json
-{
-  "email": "koray.sels@test.be",
-  "password": "123456",
-  "firstName": "Koray",
-  "lastName": "Sels",
-  "profilePicture": "https://media.licdn.com/dms/image/v2/C4D03AQGHrltVdzoL5w/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1649426527389?e=1763596800&v=beta&t=t5xhvRqmohGKkQ6si-NhoB2PJgblhU8SjIwaAQ1zdsY",
-  "role": "admin"
-}
-```
+- **Framework**: Next.js 15.5 (App Router, React Server Components)
+- **Language**: TypeScript 5
+- **UI Library**: React 19.1
+- **Styling**: Tailwind CSS 4
+- **3D Graphics**: Three.js with React Three Fiber & Drei
+- **Post-processing**: @react-three/postprocessing
+- **Animations**: tw-animate-css
+- **Forms**: React Hook Form + Zod validation
+- **State Management**: TanStack Query (React Query) v5
+
+### UI Components
+
+- **Component Library**: shadcn/ui (Radix UI primitives)
+- **Icons**: Lucide React
+- **Fonts**: Inter & Poppins (Google Fonts)
+- **Notifications**: Sonner
+- **Gestures**: @use-gesture/react
+
+### Backend
+
+- **API Routes**: Next.js 15 Route Handlers
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: NextAuth.js v5 (Beta)
+- **Password Hashing**: bcryptjs
+- **Scheduling**: node-cron
+- **Geometry Processing**: polygon-clipping
+
+### Development Tools
+
+- **Runtime**: Next.js Turbopack
+- **Linting**: ESLint 9
+- **Type Checking**: TypeScript strict mode
+- **Environment Variables**: dotenv
+- **Database Container**: Docker Compose
